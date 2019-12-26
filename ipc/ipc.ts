@@ -55,7 +55,7 @@ export interface IPCMessage {
 // but it provides a stricter method of validating incoming JSON messages than simply
 // casting the result of JSON.parse() to an interface.
 function jsonSchema(schema: object) {
-  const ajv = new Ajv({allErrors: true});
+  const ajv = new Ajv({ allErrors: true });
   schema["additionalProperties"] = false;
   const validate = ajv.compile(schema);
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
@@ -80,19 +80,19 @@ export class IPCHandlers {
 
   @jsonSchema({
     "properties": {
-      "title": {"type": "string", "minLength": 1, "maxLength": 100},
-      "message": {"type": "string", "minLength": 1, "maxLength": 100},
-      "openDirectory": {"type": "boolean"},
-      "multiSelections": {"type": "boolean"},
+      "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "message": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "openDirectory": { "type": "boolean" },
+      "multiSelections": { "type": "boolean" },
       "filter": {
         "type": "array",
         "items": {
           "type": "object",
           "properties": {
-            "name": {"type": "string"},
+            "name": { "type": "string" },
             "extensions": {
               "type": "array",
-              "items": {"type": "string"}
+              "items": { "type": "string" }
             }
           }
         }
@@ -125,12 +125,47 @@ export class IPCHandlers {
     return JSON.stringify({ files: files });
   }
 
+  private static async readMetadata(scanPath: string): Promise<Object> {
+    return new Promise((resolve, reject) => {
+      fs.readFile(path.join(scanPath, 'metadata.json'), (err, data) => {
+        if (err) {
+          return reject(err);
+        }
+        const metadata = JSON.parse(data.toString());
+        fs.readdir(scanPath, (err, ls) => {
+          if (err) {
+            return reject(err);
+          }
+          metadata['screenshots'] = ls;
+          resolve(metadata);
+        });
+      });
+    });
+  }
+
+  static async electric_scans(_: string): Promise<string> {
+    const scansDir = path.join(homedir(), '.electric', 'scans');
+    return new Promise((resolve, reject) => {
+      fs.readdir(scansDir, (err, scans) => {
+        if (err) {
+          return reject(err);
+        }
+        const results = {};
+        scans.forEach(async (scanId) => {
+          const meta = await IPCHandlers.readMetadata(path.join(scansDir, scanId));
+          results[scanId] = meta;
+        });
+        resolve(JSON.stringify(results));
+      });
+    });
+  }
+
   @jsonSchema({
     "properties": {
-      "title": {"type": "string", "minLength": 1, "maxLength": 100},
-      "message": {"type": "string", "minLength": 1, "maxLength": 100},
-      "filename": {"type": "string", "minLength": 1},
-      "data": {"type": "string"}
+      "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "message": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "filename": { "type": "string", "minLength": 1 },
+      "data": { "type": "string" }
     },
     "required": ["title", "message", "filename", "data"]
   })

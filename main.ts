@@ -93,9 +93,9 @@ try {
     createMainWindow();
     startIPCHandlers(mainWindow);
 
-    const resultDir = path.join(os.homedir(), '.electric', 'scans');
+    const scansDir = path.join(os.homedir(), '.electric', 'scans');
     const scanner = new ElectricScanner();
-    const results = await scanner.start(resultDir, [
+    const results = await scanner.start(scansDir, 'test', [
       'https://www.google.com/',
       'http://bishopfox.com/',
       'https://badwith.computer',

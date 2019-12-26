@@ -54,7 +54,7 @@ export class ElectricScanner {
     });
   }
 
-  async start(resultDir: string, targets: string[]): Promise<Scan> {
+  async start(parentDir: string, name: string, targets: string[]): Promise<Scan> {
     const scan: Scan = {
       id: uuid().toString(),
       results: [],
@@ -62,8 +62,8 @@ export class ElectricScanner {
     };
     console.log(`Starting new scan with id ${scan.id}`)
     console.log(`Max number of workers: ${this.maxNumOfWorkers}`);
-    const startTime = new Date().getTime();
-    const scanDir = path.join(resultDir, scan.id);
+    const started = new Date();
+    const scanDir = path.join(parentDir, scan.id);
     if (!fs.existsSync(scanDir)) {
       fs.mkdirSync(scanDir, {mode: 0o700, recursive: true});
       console.log(`Created scan directory: ${scanDir}`);
@@ -71,9 +71,20 @@ export class ElectricScanner {
     const tasks = this.unique(targets);
     console.log(`Scanning ${tasks.length} target(s) ...`);
     scan.results = await this.executeQueue(scanDir, tasks);
-    scan.duration = new Date().getTime() - startTime;
-    console.log(`Scan completed: ${scan.duration}`)
+    scan.duration = new Date().getTime() - started.getTime();
+    console.log(`Scan completed: ${scan.duration}`);
+    this.saveMetadata(scanDir, name, started, scan.duration);
     return scan;
+  }
+
+  private async saveMetadata(scanDir: string, name: string, started: Date, duration: number) {
+    const metaPath = path.join(scanDir, 'metadata.json');
+    const metadata = {
+      name: name,
+      started: started.toString(),
+      duration: duration,
+    };
+    fs.writeFile(metaPath, metadata, {mode: 0o600, encoding: 'utf-8'}, console.error);
   }
 
   private executeQueue(scanDir: string, tasks: string[]): Promise<ScanResult[]> {
