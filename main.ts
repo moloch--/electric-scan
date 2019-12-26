@@ -19,13 +19,14 @@
 
 import { app, BrowserWindow, screen, protocol } from 'electron';
 import * as path from 'path';
+import * as os from 'os';
 
 import { startIPCHandlers } from './ipc/ipc';
 import * as AppProtocol from './app-protocol';
+import { ElectricScanner } from './scanner';
 
 
 let mainWindow: BrowserWindow;
-
 
 async function createMainWindow() {
 
@@ -63,7 +64,7 @@ async function createMainWindow() {
     mainWindow.show();
   });
 
-  mainWindow.loadURL(`${AppProtocol.scheme}://rse/index.html`);
+  mainWindow.loadURL(`${AppProtocol.scheme}://electric/index.html`);
   mainWindow.webContents.openDevTools();
 
   // Emitted when the window is closed.
@@ -83,7 +84,7 @@ async function createMainWindow() {
 try {
 
   // Custom protocol handler
-  app.on('ready', () => {
+  app.on('ready', async () => {
     protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler, (err) => {
       if (err) {
         console.error(`[app-protocol] Error: ${err}`);
@@ -91,21 +92,15 @@ try {
     });
     createMainWindow();
     startIPCHandlers(mainWindow);
-  });
 
-  // Attempt to prevent navigation in any window
-  // WARNING: https://github.com/electron/electron/issues/8841
-  app.on('web-contents-created', (_, contents) => {
-    contents.on('will-navigate', (event, url) => {
-      console.log(`[will-navigate] ${url}`);
-      console.log(event);
-      event.preventDefault();
-    });
-    contents.on('will-redirect', (event, url) => {
-      console.log(`[will-redirect] ${url}`);
-      console.log(event);
-      event.preventDefault();
-    });
+    const resultDir = path.join(os.homedir(), '.electric', 'scans');
+    const scanner = new ElectricScanner();
+    const results = await scanner.start(resultDir, [
+      'https://www.google.com/',
+      'http://bishopfox.com/',
+      'https://badwith.computer',
+    ]);
+    console.log(`Results: ${results}`);
   });
 
   protocol.registerSchemesAsPrivileged([{
