@@ -11,10 +11,7 @@
 main.js
 app-protocol.js
 
-rpc/*.js
-rpc/pb/*.js
-rpc/pb/*_pb.d.ts
-
+scanner/*.js
 ipc/*.js
 
 src/**/*.js
