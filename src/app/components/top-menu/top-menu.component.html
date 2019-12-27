@@ -1,0 +1,46 @@
+<mat-toolbar class="app-toolbar" color="primary" style="-webkit-app-region: drag">
+  <span style="width: 60px;"></span>
+  
+  <div>
+
+    <button mat-button style="-webkit-app-region: no-drag" [routerLink]="['/home']">
+      <i class="fas fa-fw fa-home"></i>
+      <ng-container i18n>
+        Home
+      </ng-container>
+    </button>
+
+    <button style="-webkit-app-region: no-drag" mat-button [routerLink]="['/scan/new']">
+      <i class="fas fa-fw fa-tractor"></i>
+      <ng-container i18n>
+        New Scan
+      </ng-container>
+    </button>
+
+    <button style="-webkit-app-region: no-drag" mat-button [routerLink]="['/scan/history']">
+      <i class="fas fa-fw fa-project-diagram"></i>
+      <ng-container i18n>
+        History
+      </ng-container>
+    </button>
+  
+  </div>
+
+  <span class="pull-right-spacer"></span>
+
+
+  <button style="-webkit-app-region: no-drag" mat-button [matMenuTriggerFor]="settings">
+    <i class="fas fa-ellipsis-v"></i>
+  </button>
+  <mat-menu style="-webkit-app-region: no-drag" #settings="matMenu">
+    <button mat-menu-item [routerLink]="['/settings']">
+      <i class="fas fa-fw fa-cogs"></i>
+      &nbsp;Settings
+    </button>
+    <button mat-menu-item (click)="onExit()">
+      <i class="fas fa-fw fa-sign-out-alt"></i>
+      &nbsp;Exit
+    </button>
+  </mat-menu>
+
+</mat-toolbar>

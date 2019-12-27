@@ -42,7 +42,9 @@ const mimeTypes = {
   '.ico': 'image/vnd.microsoft.icon',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
-  '.map': 'text/plain'
+  '.map': 'text/plain',
+  '.woff': 'application/x-font-woff',
+  '.woff2': 'font/woff2'
 };
 
 function charset(mimeType: string): string {
