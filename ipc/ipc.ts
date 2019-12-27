@@ -29,6 +29,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Ajv from 'ajv';
 
+import { ElectricScanner } from '../scanner';
+
+
 export interface ReadFileReq {
   title: string;
   message: string;
@@ -143,7 +146,7 @@ export class IPCHandlers {
     });
   }
 
-  static async electric_scans(_: string): Promise<string> {
+  static async electric_scanList(_: string): Promise<string> {
     const scansDir = path.join(homedir(), '.electric', 'scans');
     return new Promise((resolve, reject) => {
       fs.readdir(scansDir, (err, scans) => {
@@ -158,6 +161,43 @@ export class IPCHandlers {
         resolve(JSON.stringify(results));
       });
     });
+  }
+
+  @jsonSchema({
+    "properties": {
+      "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "targets": { 
+        "type": "array",
+        "minLength": 1,
+        "items": { "type": "string", "minLength": 1 },
+        "additionalItems": false,
+      },
+      "maxWorkers": { "type": "number" },
+      "width":  { "type": "number" },
+      "height":  { "type": "number" },
+      "margin":  { "type": "number" },
+      "timeout":  { "type": "number" },
+    },
+    "required": ["name", "targets"]
+  })
+  static async electric_scan(req: string): Promise<string> {
+    const scanReq = JSON.parse(req);
+    const scanner = new ElectricScanner(scanReq.maxWorkers ? scanReq.maxWorkers : 8);
+    if (scanReq.width) {
+      scanner.width = scanReq.width;
+    }
+    if (scanReq.height) {
+      scanner.height = scanReq.height;
+    }
+    if (scanReq.margin) {
+      scanner.margin = scanReq.margin;
+    }
+    if (scanReq.timeout) {
+      scanner.timeout = scanReq.timeout;
+    }
+    const parentDir = path.join(homedir(), '.electric-scan', 'scans');
+    const scanId = await scanner.start(parentDir, scanReq.name, scanReq.targets);
+    return JSON.stringify({ scan: scanId });
   }
 
   @jsonSchema({

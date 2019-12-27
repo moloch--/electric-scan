@@ -21,6 +21,7 @@ import { BrowserWindow, NativeImage } from 'electron';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Observer } from 'rxjs';
 
 // Screenshot data + metadata
 interface Screenshot {
@@ -39,6 +40,7 @@ export interface ScanResult {
 // Results for the entire scan
 export interface Scan {
   id: string;
+  name: string;
   results: ScanResult[];
   duration: number;
 }
@@ -52,16 +54,17 @@ export class ElectricScanner {
 
   constructor(private maxNumOfWorkers = 8) { }
 
-  unique(targets: string[]): string[] {
+  private unique(targets: string[]): string[] {
     targets = targets.map(target => target.trim());
     return targets.filter((elem, index, self) => {
       return index === self.indexOf(elem);
     });
   }
 
-  async start(parentDir: string, name: string, targets: string[]): Promise<Scan> {
+  async start(parentDir: string, name: string, targets: string[]): Promise<string> {
     const scan: Scan = {
       id: uuid().toString(),
+      name: name,
       results: [],
       duration: -1,
     };
@@ -73,21 +76,24 @@ export class ElectricScanner {
       fs.mkdirSync(scanDir, {mode: 0o700, recursive: true});
       console.log(`Created scan directory: ${scanDir}`);
     }
-    const tasks = this.unique(targets);
-    console.log(`Scanning ${tasks.length} target(s) ...`);
-    scan.results = await this.executeQueue(scanDir, tasks);
-    scan.duration = new Date().getTime() - started.getTime();
-    console.log(`Scan completed: ${scan.duration}`);
-    this.saveMetadata(scanDir, name, started, scan.duration);
-    return scan;
+    setImmediate(async () => {
+      const tasks = this.unique(targets);
+      console.log(`Scanning ${tasks.length} target(s) ...`);
+      scan.results = await this.executeQueue(scanDir, tasks);
+      scan.duration = new Date().getTime() - started.getTime();
+      console.log(`Scan completed: ${scan.duration}`);
+      this.saveMetadata(scanDir, started, scan);
+    });
+    return scan.id;
   }
 
-  private async saveMetadata(scanDir: string, name: string, started: Date, duration: number) {
+  private async saveMetadata(scanDir: string, started: Date, scan: Scan) {
     const metaPath = path.join(scanDir, 'metadata.json');
     const metadata = JSON.stringify({
-      name: name,
+      name: scan.name,
       started: started.toString(),
-      duration: duration,
+      duration: scan.duration,
+      results: scan.results,
     });
     fs.writeFile(metaPath, metadata, {mode: 0o600, encoding: 'utf-8'}, console.error);
   }
