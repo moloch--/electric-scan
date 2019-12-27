@@ -45,6 +45,11 @@ export interface Scan {
 
 export class ElectricScanner {
 
+  public width: number = 1920;
+  public height: number = 1080;
+  public timeout: number = 10000;
+  public margin: number = 100;
+
   constructor(private maxNumOfWorkers = 8) { }
 
   unique(targets: string[]): string[] {
@@ -79,11 +84,11 @@ export class ElectricScanner {
 
   private async saveMetadata(scanDir: string, name: string, started: Date, duration: number) {
     const metaPath = path.join(scanDir, 'metadata.json');
-    const metadata = {
+    const metadata = JSON.stringify({
       name: name,
       started: started.toString(),
       duration: duration,
-    };
+    });
     fs.writeFile(metaPath, metadata, {mode: 0o600, encoding: 'utf-8'}, console.error);
   }
 
@@ -93,6 +98,7 @@ export class ElectricScanner {
     const results: ScanResult[] = new Array(tasks.length);
 
     return new Promise(complete => {
+
       const handleResult = (index: number, screenshot: Screenshot) => {
         console.log(`handleResult()`);
         const taskId = uuid().toString();
@@ -137,7 +143,8 @@ export class ElectricScanner {
     });
   }
 
-  private async capture(target: string, width = 1920, height = 1080, timeout = 10000, margin = 50): Promise<Screenshot> {
+  private async capture(target: string): Promise<Screenshot> {
+
     const targetURL = new URL(target);
     console.log(`Screen capture: ${targetURL.toString()}`);
     if (targetURL.protocol !== 'http:' && targetURL.protocol !== 'https:') {
@@ -147,7 +154,8 @@ export class ElectricScanner {
         error: `Invalid protocol '${targetURL.protocol}'`
       });
     }
-    let scanWindow = this.scanWindow(width, height);
+  
+    let scanWindow = this.scanWindow(this.width, this.height);
     scanWindow.on('closed', () => {
       scanWindow = null;
     });
@@ -155,28 +163,27 @@ export class ElectricScanner {
     
     try {
       const image: NativeImage = await new Promise((resolve, reject) => {
+        // Set timeout and clear it if we get a 'dom-ready'
         const timeoutErr = setTimeout(() => {
           scanWindow.close();
           reject('timeout');
-        }, timeout);
-  
+        }, this.timeout);
         scanWindow.webContents.once('dom-ready', () => {
+          // We got a 'dom-ready' wait 'margin' ms before capturePage()
           console.log(`DOM ready for ${targetURL.toString()}`);
           clearTimeout(timeoutErr);
           setTimeout(async () => {
             const image = await scanWindow.capturePage();
             scanWindow.close();
             resolve(image);
-          }, margin);
+          }, this.margin);
         });
       });
-
       return {
         target: targetURL.toString(),
         image: image,
         error: '',
       };
-
     } catch (err) {
       return {
         target: targetURL.toString(),
@@ -191,7 +198,7 @@ export class ElectricScanner {
     return new BrowserWindow({
       width: width,
       height: height,
-      show: true,
+      show: false,
       webPreferences: {
         sandbox: true,
         webSecurity: true,

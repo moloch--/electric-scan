@@ -92,15 +92,6 @@ try {
     });
     createMainWindow();
     startIPCHandlers(mainWindow);
-
-    const scansDir = path.join(os.homedir(), '.electric', 'scans');
-    const scanner = new ElectricScanner();
-    const results = await scanner.start(scansDir, 'test', [
-      'https://www.google.com/',
-      'http://bishopfox.com/',
-      'https://badwith.computer',
-    ]);
-    console.log(`Results: ${results}`);
   });
 
   protocol.registerSchemesAsPrivileged([{
