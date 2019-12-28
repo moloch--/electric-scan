@@ -21,7 +21,7 @@ import { BrowserWindow, NativeImage } from 'electron';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Observer } from 'rxjs';
+
 
 // Screenshot data + metadata
 interface Screenshot {
@@ -105,7 +105,7 @@ export class ElectricScanner {
     let taskIndex = 0;
     const results: ScanResult[] = new Array(tasks.length);
 
-    return new Promise(complete => {
+    return new Promise((complete) => {
 
       const handleResult = (index: number, screenshot: Screenshot) => {
         console.log(`handleResult()`);

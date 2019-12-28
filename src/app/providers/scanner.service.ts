@@ -41,10 +41,9 @@ export class ScannerService {
     return resp;
   }
 
-  async electricScanList(): Promise<string[]> {
-    const resp = await fetch('scan://electric/');
-    const ls = resp.json();
-    return ls['scans'] ? ls['scans'] : [];
+  async electricList(): Promise<Object> {
+    const ls = await this._ipc.request('electric_list', '');
+    return JSON.parse(ls);
   }
 
 }

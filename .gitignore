@@ -10,6 +10,7 @@
 /release
 main.js
 app-protocol.js
+scan-protocol.js
 
 scanner/*.js
 ipc/*.js

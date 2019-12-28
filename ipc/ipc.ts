@@ -133,7 +133,7 @@ export class IPCHandlers {
     return JSON.stringify({ files: files });
   }
 
-  private static async readMetadata(scanPath: string): Promise<Object> {
+  private static async readMetadata(scanPath: string): Promise<any> {
     return new Promise((resolve, reject) => {
       fs.readFile(path.join(scanPath, 'metadata.json'), (err, data) => {
         if (err) {
@@ -151,18 +151,20 @@ export class IPCHandlers {
     });
   }
 
-  static async electric_scanList(_: string): Promise<string> {
+  static async electric_list(_: string): Promise<string> {
     const scansDir = path.join(homedir(), '.electric', 'scans');
     return new Promise((resolve, reject) => {
-      fs.readdir(scansDir, (err, scans) => {
+      fs.readdir(scansDir, async (err, ls) => {
         if (err) {
           return reject(err);
         }
         const results = {};
-        scans.forEach(async (scanId) => {
+        for (let index = 0; index < ls.length; ++index) {
+          const scanId = ls[index];
+          console.log(`scanId = ${scanId}`);
           const meta = await IPCHandlers.readMetadata(path.join(scansDir, scanId));
           results[scanId] = meta;
-        });
+        }
         resolve(JSON.stringify(results));
       });
     });
@@ -201,7 +203,7 @@ export class IPCHandlers {
     if (scanReq.timeout) {
       scanner.timeout = scanReq.timeout;
     }
-    const parentDir = path.join(homedir(), '.electric-scan', 'scans');
+    const parentDir = path.join(homedir(), '.electric', 'scans');
     const scanId = await scanner.start(parentDir, scanReq.name, scanReq.targets);
     return JSON.stringify({ scan: scanId });
   }

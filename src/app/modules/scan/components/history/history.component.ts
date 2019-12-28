@@ -8,7 +8,7 @@ import { ScannerService } from '@app/providers/scanner.service';
 })
 export class HistoryComponent implements OnInit {
 
-  scans: Object[];
+  history: any;
 
   constructor(private _scannerService: ScannerService) { }
 
@@ -17,7 +17,8 @@ export class HistoryComponent implements OnInit {
   }
 
   async fetch() {
-
+    this.history = await this._scannerService.electricList();
+    console.log(this.history);
   }
 
 }

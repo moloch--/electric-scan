@@ -27,13 +27,8 @@ const SCAN_DIR = path.join(os.homedir(), '.electric', 'scans');
 export const scheme = 'scan';
 
 const mimeTypes = {
-  '.json': 'application/json',
   '.png': 'image/png',
 };
-
-function charset(mimeType: string): string {
-  return ['.json'].some(m => m === mimeType) ? 'utf-8' : null;
-}
 
 function mime(filename: string): string {
   const type = mimeTypes[path.extname(`${filename || ''}`).toLowerCase()];
@@ -43,31 +38,17 @@ function mime(filename: string): string {
 export function requestHandler(req: Electron.Request, next: ProtocolCallback) {
   const reqUrl = new URL(req.url);
   let reqPath = path.normalize(reqUrl.pathname);
-  if (reqPath === '/') {
-    fs.readdir(SCAN_DIR, (err, files) => {
-      if (!err) {
-        next({
-          mimeType: 'application/json',
-          charset: 'utf-8',
-          data: Buffer.from(JSON.stringify({ scans: files })),
-        });
-      } else {
-        console.error(err);
-      }
-    });
-  } else {
-    const reqFilename = path.basename(reqPath);
-    fs.readFile(path.join(SCAN_DIR, reqPath), (err, data) => {
-      const mimeType = mime(reqFilename);
-      if (!err && mimeType !== null) {
-        next({
-          mimeType: mimeType,
-          charset: charset(mimeType),
-          data: data
-        });
-      } else {
-        console.error(err);
-      }
-    });
-  }
+  const reqFilename = path.basename(reqPath);
+  fs.readFile(path.join(SCAN_DIR, reqPath), (err, data) => {
+    const mimeType = mime(reqFilename);
+    if (!err && mimeType !== null) {
+      next({
+        mimeType: mimeType,
+        charset: null,
+        data: data
+      });
+    } else {
+      console.error(err);
+    }
+  });
 }
