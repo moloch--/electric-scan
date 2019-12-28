@@ -8,8 +8,6 @@ import { AppConfig } from '../environments/environment';
 })
 export class AppComponent {
   
-  constructor() {
-
-  }
+  constructor() { }
 
 }

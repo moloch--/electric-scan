@@ -95,7 +95,9 @@ export class ElectricScanner {
       duration: scan.duration,
       results: scan.results,
     });
-    fs.writeFile(metaPath, metadata, {mode: 0o600, encoding: 'utf-8'}, console.error);
+    fs.writeFile(metaPath, metadata, {mode: 0o600, encoding: 'utf-8'}, (err) => {
+      err ? console.error(err) : null;
+    });
   }
 
   private executeQueue(scanDir: string, tasks: string[]): Promise<ScanResult[]> {
@@ -122,9 +124,13 @@ export class ElectricScanner {
         const filePath = path.join(scanDir, `${taskId}.json`);
         const filePNG = path.join(scanDir, `${taskId}.png`);
         console.log(`Saving result for ${screenshot.target} to ${filePath}`);
-        fs.writeFile(filePath, data, {mode: 0o600, encoding: 'utf-8'}, console.error);
+        fs.writeFile(filePath, data, {mode: 0o600, encoding: 'utf-8'}, (err) => {
+          err ? console.error(err) : null;
+        });
         const imageData = screenshot.image ? screenshot.image.toPNG() : new Buffer('');
-        fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, console.error);
+        fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err) => {
+          err ? console.error(err) : null;
+        });
         numOfWorkers--;
         getNextTask();
       };

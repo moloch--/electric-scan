@@ -23,6 +23,7 @@ import * as path from 'path';
 
 import { startIPCHandlers } from './ipc/ipc';
 import * as AppProtocol from './app-protocol';
+import * as ScanProtocol from './scan-protocol';
 
 
 let mainWindow: BrowserWindow;
@@ -96,6 +97,11 @@ try {
 
   protocol.registerSchemesAsPrivileged([{
     scheme: AppProtocol.scheme,
+    privileges: { standard: true, secure: true }
+  }]);
+
+  protocol.registerSchemesAsPrivileged([{
+    scheme: ScanProtocol.scheme,
     privileges: { standard: true, secure: true }
   }]);
 

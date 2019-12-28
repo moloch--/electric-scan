@@ -245,12 +245,12 @@ export class IPCHandlers {
 
 }
 
+// IPC handlers must start with "namespace_" this helps ensure we do not inadvertently
+// expose methods that we don't want exposed to the sandboxed code.
+const prefixWhitelist = ['fs_', 'client_', 'electric_'];
 async function dispatchIPC(method: string, data: string): Promise<string | null> {
   console.log(`IPC Dispatch: ${method}`);
-
-  // IPC handlers must start with "namespace_" this helps ensure we do not inadvertently
-  // expose methods that we don't want exposed to the sandboxed code.
-  if (['fs_'].some(prefix => method.startsWith(prefix))) {
+  if (prefixWhitelist.some(prefix => method.startsWith(prefix))) {
     if (typeof IPCHandlers[method] === 'function') {
       const result: string = await IPCHandlers[method](data);
       return result;

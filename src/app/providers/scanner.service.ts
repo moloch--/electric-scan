@@ -29,7 +29,7 @@ export class ScannerService {
 
   constructor(private _ipc: IPCService) { }
 
-  async electricScan(name: string, targets: string[], workers: number, height: number, width: number, margin: number): Promise<string> {
+  async electricScan(name: string, targets: string[], workers: number, width: number, height: number, margin: number): Promise<string> {
     const resp = await this._ipc.request(`electric_scan`, JSON.stringify({
       name: name,
       width: width,
@@ -41,8 +41,10 @@ export class ScannerService {
     return resp;
   }
 
-  async electricScanList(): Promise<string> {
-    return this._ipc.request('electric_scanList');
+  async electricScanList(): Promise<string[]> {
+    const resp = await fetch('scan://electric/');
+    const ls = resp.json();
+    return ls['scans'] ? ls['scans'] : [];
   }
 
 }
