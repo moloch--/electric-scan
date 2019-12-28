@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, ValidationErrors } from '@angular/forms';
 import { ScannerService } from '@app/providers/scanner.service';
 
 @Component({
@@ -8,18 +9,28 @@ import { ScannerService } from '@app/providers/scanner.service';
 })
 export class NewComponent implements OnInit {
 
-  constructor(private _scannerService: ScannerService) { }
+  startScanForm: FormGroup;
+
+  constructor(private _fb: FormBuilder,
+              private _scannerService: ScannerService) { }
 
   ngOnInit() {
-    console.log('starting scan...');
-    this.startScan();
+    this.startScanForm = this._fb.group({
+      name: ['', Validators.compose([
+        Validators.required,
+      ])],
+      targets: ['', Validators.compose([
+        Validators.required,
+      ])],
+    });
   }
 
-  startScan() {
-    this._scannerService.electricScan('test1', [
+  async startScan() {
+    const scanId = await this._scannerService.electricScan('test1', [
       'https://google.com/',
       'https://bishopfox.com/'
     ], 8, 1920, 1080, 50);
+    console.log(scanId);
   }
 
 }

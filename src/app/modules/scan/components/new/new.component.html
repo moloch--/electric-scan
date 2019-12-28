@@ -1,5 +1,20 @@
-<div>
+<div class="example-container">
 
-    <h1>New Scan</h1>
-    
+  <form [formGroup]="startScanForm">
+
+    <mat-form-field>
+      <input matInput [formControl]="startScanForm.controls['name']" placeholder="Name">
+    </mat-form-field>
+  
+    <mat-form-field>
+      <textarea matInput [formControl]="startScanForm.controls['targets']"  placeholder="Targets">
+      </textarea>
+    </mat-form-field>
+
+  </form>
+
+  <button mat-raised-button (click)="startScan">
+    Start Scan
+  </button>
+
 </div>

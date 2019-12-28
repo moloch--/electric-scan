@@ -8,7 +8,7 @@
     "name": "moloch",
     "email": "contact@bishopfox.com"
   },
-  "repository": "https://github.com/BishopFox/",
+  "repository": "https://github.com/moloch--/electric-scan",
   "main": "main.js",
   "private": true,
   "scripts": {
@@ -84,6 +84,7 @@
     "@types/uuid": "^3.4.5",
     "ajv": "^6.10.2",
     "base64-arraybuffer": "^0.2.0",
+    "hammerjs": "^2.0.8",
     "help": "^3.0.2",
     "moment": "^2.24.0",
     "pako": "^1.0.10",
