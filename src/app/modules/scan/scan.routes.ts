@@ -21,10 +21,10 @@ import { NewComponent } from './components/new/new.component';
 
 const routes: Routes = [
 
-    { path: 'scans', component: HistoryComponent },
-    { path: 'scans/new', component: NewComponent },
-    { path: 'scans/view/:scan-id', component: ViewComponent, },
+    { path: 'scan/history', component: HistoryComponent },
+    { path: 'scan/new', component: NewComponent },
+    { path: 'scan/view/:scan-id', component: ViewComponent, },
 
 ];
 
-export const SessionsRoutes: ModuleWithProviders = RouterModule.forChild(routes);
+export const ScanModuleRouting: ModuleWithProviders = RouterModule.forChild(routes);

@@ -20,7 +20,6 @@
 import { Injectable } from '@angular/core';
 
 import { IPCService } from './ipc.service';
-import { stringify } from 'querystring';
 
 
 @Injectable({
@@ -30,12 +29,20 @@ export class ScannerService {
 
   constructor(private _ipc: IPCService) { }
 
-  async electricScan(name: string, targets: string[]): Promise<string> {
+  async electricScan(name: string, targets: string[], workers: number, height: number, width: number, margin: number): Promise<string> {
     const resp = await this._ipc.request(`electric_scan`, JSON.stringify({
-      name: stringify,
+      name: name,
+      width: width,
+      height: height,
+      margin: margin,
       targets: targets,
+      maxWorkers: workers,
     }));
     return resp;
+  }
+
+  async electricScanList(): Promise<string> {
+    return this._ipc.request('electric_scanList');
   }
 
 }

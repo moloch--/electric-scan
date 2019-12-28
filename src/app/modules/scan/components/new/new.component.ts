@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ScannerService } from '@app/providers/scanner.service';
 
 @Component({
   selector: 'app-new',
@@ -7,9 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class NewComponent implements OnInit {
 
-  constructor() { }
+  constructor(private _scannerService: ScannerService) { }
 
   ngOnInit() {
+  }
+
+  startScan() {
+    
   }
 
 }

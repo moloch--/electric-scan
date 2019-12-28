@@ -24,12 +24,13 @@ but should not be directly accessible since it itself is not sandboxed.
 
 const { ipcRenderer } = require('electron');
 
+const prefixWhitelist = ['fs_', 'client_', 'electric_'];
 
 window.addEventListener('message', (event) => {
   try {
     const msg = JSON.parse(event.data);
     if (msg.type === 'request') {
-      if (['fs_'].some(prefix => msg.method.startsWith(prefix))) {
+      if (prefixWhitelist.some(prefix => msg.method.startsWith(prefix))) {
         ipcRenderer.send('ipc', msg);
       }
     }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ScannerService } from '@app/providers/scanner.service';
 
 @Component({
   selector: 'app-history',
@@ -7,9 +8,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HistoryComponent implements OnInit {
 
-  constructor() { }
+  scans: Object[];
+
+  constructor(private _scannerService: ScannerService) { }
 
   ngOnInit() {
+    this.fetch();
+  }
+
+  async fetch() {
+
   }
 
 }

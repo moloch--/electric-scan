@@ -81,6 +81,11 @@ function jsonSchema(schema: object) {
 // IPC Methods used to start/interact with the RPCClient
 export class IPCHandlers {
 
+  static client_exit() {
+    process.on('unhandledRejection', () => { }); // STFU Node
+    process.exit(0);
+  }
+
   @jsonSchema({
     "properties": {
       "title": { "type": "string", "minLength": 1, "maxLength": 100 },
@@ -182,7 +187,8 @@ export class IPCHandlers {
   })
   static async electric_scan(req: string): Promise<string> {
     const scanReq = JSON.parse(req);
-    const scanner = new ElectricScanner(scanReq.maxWorkers ? scanReq.maxWorkers : 8);
+    const workers = scanReq.maxWorkers ? Math.abs(scanReq.maxWorkers || 1) : 8;
+    const scanner = new ElectricScanner(workers);
     if (scanReq.width) {
       scanner.width = scanReq.width;
     }

@@ -10,6 +10,7 @@ import { SharedModule } from './shared/shared.module';
 import { AppRoutingModule } from './app-routing.module';
 import { BaseMaterialModule } from './base-material';
 import { ScanModule } from './modules/scan/scan.module';
+import { ScanModuleRouting } from './modules/scan/scan.routes';
 
 import { IPCService } from './providers/ipc.service';
 import { FileSystemService } from './providers/filesystem.service';
@@ -18,6 +19,7 @@ import { ScannerService } from './providers/scanner.service';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import { TopMenuComponent } from './components/top-menu/top-menu.component';
+import { SettingsComponent } from './components/settings/settings.component';
 
 
 @NgModule({
@@ -28,7 +30,9 @@ import { TopMenuComponent } from './components/top-menu/top-menu.component';
     HomeComponent,
     TopMenuComponent,
 
-    AppComponent
+    AppComponent,
+
+    SettingsComponent
   ],
   imports: [
     BrowserModule,
@@ -37,10 +41,13 @@ import { TopMenuComponent } from './components/top-menu/top-menu.component';
     ReactiveFormsModule,
     BaseMaterialModule,
 
-    ScanModule,
-
-    SharedModule,
+    // Routes
     AppRoutingModule,
+    ScanModuleRouting,
+
+    // Modules
+    ScanModule,
+    SharedModule,
   ],
   providers: [IPCService, FileSystemService, ScannerService],
   bootstrap: [AppComponent]

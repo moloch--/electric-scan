@@ -18,12 +18,11 @@
 */
 
 import { app, BrowserWindow, screen, protocol } from 'electron';
+const { systemPreferences } = require('electron');
 import * as path from 'path';
-import * as os from 'os';
 
 import { startIPCHandlers } from './ipc/ipc';
 import * as AppProtocol from './app-protocol';
-import { ElectricScanner } from './scanner';
 
 
 let mainWindow: BrowserWindow;
@@ -36,6 +35,7 @@ async function createMainWindow() {
   // Create the browser window.
   const gutterSize = 100;
   mainWindow = new BrowserWindow({
+    titleBarStyle: 'hidden',
     x: gutterSize,
     y: gutterSize,
     width: size.width - (gutterSize * 2),
@@ -75,13 +75,13 @@ async function createMainWindow() {
     mainWindow = null;
   });
 
-  console.log('Main window done');
-
 }
 
 // ----------------------------------------- [ MAIN ] -----------------------------------------
 
 try {
+
+  console.log(`dark mode: ${systemPreferences.isDarkMode()}`);
 
   // Custom protocol handler
   app.on('ready', async () => {
