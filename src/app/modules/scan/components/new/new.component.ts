@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ValidationErrors } from '@angular/forms';
 import { ScannerService } from '@app/providers/scanner.service';
+import { FadeInOut } from '@app/shared/animations';
+
 
 @Component({
   selector: 'app-new',
   templateUrl: './new.component.html',
-  styleUrls: ['./new.component.scss']
+  styleUrls: ['./new.component.scss'],
+  animations: [FadeInOut]
 })
 export class NewComponent implements OnInit {
 

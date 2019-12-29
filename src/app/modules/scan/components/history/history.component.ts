@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ScannerService } from '@app/providers/scanner.service';
+import { FadeInOut } from '@app/shared/animations';
+
 
 @Component({
   selector: 'app-history',
   templateUrl: './history.component.html',
-  styleUrls: ['./history.component.scss']
+  styleUrls: ['./history.component.scss'],
+  animations: [FadeInOut]
 })
 export class HistoryComponent implements OnInit {
 
