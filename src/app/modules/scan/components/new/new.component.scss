@@ -1,8 +1,38 @@
 .form-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+
+    grid-template-rows: minmax(50px, auto);
+    grid-template-columns: 1fr 5fr 1fr;
 }
-  
-.form-container > * {
+
+.header-form-container {
+    grid-column: 2/3;
+    grid-row: 1/2;
+}
+
+.main-form-container {
+    grid-column: 2/3;
+    grid-row: 2/3;
+}
+
+.inner-main-form-container {
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 2fr;
+}
+
+.footer-form-container {
+    grid-column: 2/3;
+    grid-row: 3/4;
+}
+
+.inner-footer-form-container {
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 2fr 4fr 2fr; 
+}
+
+.start-scan-button {
+    grid-column: 2/3;
     width: 100%;
 }

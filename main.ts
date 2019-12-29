@@ -18,7 +18,7 @@
 */
 
 import { app, BrowserWindow, screen, protocol } from 'electron';
-const { systemPreferences } = require('electron');
+const { nativeTheme } = require('electron');
 import * as path from 'path';
 
 import { startIPCHandlers } from './ipc/ipc';
@@ -82,7 +82,7 @@ async function createMainWindow() {
 
 try {
 
-  console.log(`dark mode: ${systemPreferences.isDarkMode()}`);
+  console.log(`dark mode: ${nativeTheme.shouldUseDarkColors}`);
 
   // Custom protocol handler
   app.on('ready', async () => {
