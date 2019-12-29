@@ -27,9 +27,9 @@ import { homedir } from 'os';
 import * as base64 from 'base64-arraybuffer';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as Ajv from 'ajv';
 
-import { ElectricScanner } from '../scanner';
+import { jsonSchema } from './jsonschema';
+import { ElectricScanner, Scan } from '../scanner';
 
 
 export interface ReadFileReq {
@@ -54,29 +54,8 @@ export interface IPCMessage {
   data: string;
 }
 
-// jsonSchema - A JSON Schema decorator, somewhat redundant given we're using TypeScript
-// but it provides a stricter method of validating incoming JSON messages than simply
-// casting the result of JSON.parse() to an interface.
-function jsonSchema(schema: object) {
-  const ajv = new Ajv({ allErrors: true });
-  schema["additionalProperties"] = false;
-  const validate = ajv.compile(schema);
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-
-    const originalMethod = descriptor.value;
-    descriptor.value = (arg: string) => {
-      const valid = validate(arg);
-      if (valid) {
-        return originalMethod(arg);
-      } else {
-        console.error(validate.errors);
-        return Promise.reject(`Invalid schema: ${ajv.errorsText(validate.errors)}`);
-      }
-    };
-
-    return descriptor;
-  };
-}
+const SCANS = {};
+const SCANS_DIR = path.join(homedir(), '.electric', 'scans');
 
 // IPC Methods used to start/interact with the RPCClient
 export class IPCHandlers {
@@ -134,15 +113,15 @@ export class IPCHandlers {
   }
 
   private static async readMetadata(scanPath: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       fs.readFile(path.join(scanPath, 'metadata.json'), (err, data) => {
         if (err) {
-          return reject(err);
+          return resolve(null);
         }
         const metadata = JSON.parse(data.toString());
         fs.readdir(scanPath, (err, ls) => {
           if (err) {
-            return reject(err);
+            return resolve(null);
           }
           metadata['screenshots'] = ls;
           resolve(metadata);
@@ -152,9 +131,8 @@ export class IPCHandlers {
   }
 
   static async electric_list(_: string): Promise<string> {
-    const scansDir = path.join(homedir(), '.electric', 'scans');
     return new Promise((resolve, reject) => {
-      fs.readdir(scansDir, async (err, ls) => {
+      fs.readdir(SCANS_DIR, async (err, ls) => {
         if (err) {
           return reject(err);
         }
@@ -162,7 +140,7 @@ export class IPCHandlers {
         for (let index = 0; index < ls.length; ++index) {
           const scanId = ls[index];
           console.log(`scanId = ${scanId}`);
-          const meta = await IPCHandlers.readMetadata(path.join(scansDir, scanId));
+          const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, scanId));
           results[scanId] = meta;
         }
         resolve(JSON.stringify(results));
@@ -204,8 +182,39 @@ export class IPCHandlers {
       scanner.timeout = scanReq.timeout;
     }
     const parentDir = path.join(homedir(), '.electric', 'scans');
-    const scanId = await scanner.start(parentDir, scanReq.name, scanReq.targets);
-    return JSON.stringify({ scan: scanId });
+    const scan$ = await scanner.start(parentDir, scanReq.name, scanReq.targets);
+    SCANS[scanner.scan.id] = scan$;
+    const subscription = scan$.subscribe((scan) => {
+      ipcMain.emit('push', JSON.stringify(scan));
+    }, (err) => {
+      console.error(`[scan error]: ${err}`);
+    }, () => {
+      delete SCANS[scanner.scan.id];
+      subscription.unsubscribe();
+    });
+    return JSON.stringify({ scan: scanner.scan.id });
+  }
+
+  @jsonSchema({
+    "properties": {
+      "scan": { "type": "string", "minLength": 1, "maxLength": 100 },
+    },
+    "required": ["scan"],
+  })
+  static electric_status(req: string): Promise<string> {
+    const scanId = JSON.parse(req)['scan'];
+    return new Promise(async (resolve, reject) => {
+      const scanSubject = SCANS[scanId];
+      if (scanSubject) {
+        const subscription = scanSubject.subscribe((scan: Scan) => {
+          resolve(JSON.stringify(scan));
+          subscription.unsubscribe();
+        });
+      } else {
+        const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, scanId));
+        meta ? resolve(meta) : reject('Scan does not exist');
+      }
+    });
   }
 
   @jsonSchema({
@@ -290,12 +299,12 @@ export function startIPCHandlers(window: BrowserWindow) {
   });
 
   // This one doesn't have an event argument for some reason ...
-  ipcMain.on('push', async (_: IpcMainEvent, data: string) => {
+  ipcMain.on('push', async (event: IpcMainEvent) => {
     window.webContents.send('ipc', {
       id: 0,
       type: 'push',
       method: '',
-      data: data
+      data: event
     });
   });
 

@@ -58,7 +58,9 @@ export class NewComponent implements OnInit {
   }
   
   parseTargets(rawTargets: string): string[] {
-    return rawTargets.split('\n');
+    return rawTargets.split('\n')
+      .map(target => target.trim())
+      .filter(t => t.length);
   }
 
 }

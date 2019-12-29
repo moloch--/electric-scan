@@ -46,9 +46,7 @@ export class IPCService {
         if (msg.type === 'response') {
           this._ipcResponse$.next(msg);
         } else if (msg.type === 'push') {
-
-          // Do something with 'push' ...
-
+          console.log(msg);
         }
       } catch (err) {
         console.error(`[IPCService] ${err}`);

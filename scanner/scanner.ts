@@ -21,6 +21,7 @@ import { BrowserWindow, NativeImage } from 'electron';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
+import { BehaviorSubject } from 'rxjs';
 
 
 // Screenshot data + metadata
@@ -42,6 +43,7 @@ export interface Scan {
   id: string;
   name: string;
   results: ScanResult[];
+  started: number;
   duration: number;
 }
 
@@ -51,83 +53,76 @@ export class ElectricScanner {
   public height: number = 1080;
   public timeout: number = 10000;
   public margin: number = 100;
+  public scan$: BehaviorSubject<Scan>;
+  public scan: Scan;
+
+  private _started: Date;
 
   constructor(private maxNumOfWorkers = 8) { }
 
   private unique(targets: string[]): string[] {
-    targets = targets.map(target => target.trim());
+    targets = targets.map(target => target.trim()).filter(t => t.length);
     return targets.filter((elem, index, self) => {
       return index === self.indexOf(elem);
     });
   }
 
-  async start(parentDir: string, name: string, targets: string[]): Promise<string> {
-    const scan: Scan = {
+  async start(parentDir: string, name: string, targets: string[]): Promise<BehaviorSubject<Scan>> {
+    const tasks = this.unique(targets);
+    this._started = new Date();
+    this.scan = {
       id: uuid().toString(),
       name: name,
-      results: [],
+      results: new Array(tasks.length),
+      started: this._started.getTime(),
       duration: -1,
     };
-    console.log(`Starting new scan with id ${scan.id}`)
+    console.log(`Starting new scan with id ${this.scan.id}`)
     console.log(`Max number of workers: ${this.maxNumOfWorkers}`);
-    const started = new Date();
-    const scanDir = path.join(parentDir, scan.id);
+    const scanDir = path.join(parentDir, this.scan.id);
     if (!fs.existsSync(scanDir)) {
       fs.mkdirSync(scanDir, {mode: 0o700, recursive: true});
       console.log(`Created scan directory: ${scanDir}`);
     }
+    this.scan$ = new BehaviorSubject(this.scan);
+    await this.saveMetadata(scanDir);
     setImmediate(async () => {
-      const tasks = this.unique(targets);
       console.log(`Scanning ${tasks.length} target(s) ...`);
-      scan.results = await this.executeQueue(scanDir, tasks);
-      scan.duration = new Date().getTime() - started.getTime();
-      console.log(`Scan completed: ${scan.duration}`);
-      this.saveMetadata(scanDir, started, scan);
+      await this.executeQueue(scanDir, tasks);
+      this.scan.duration = new Date().getTime() - this._started.getTime();
+      console.log(`Scan completed: ${this.scan.duration}`);
+      await this.saveMetadata(scanDir);
+      this.scan$.complete();
     });
-    return scan.id;
+    return this.scan$;
   }
 
-  private async saveMetadata(scanDir: string, started: Date, scan: Scan) {
-    const metaPath = path.join(scanDir, 'metadata.json');
-    const metadata = JSON.stringify({
-      name: scan.name,
-      started: started.toString(),
-      duration: scan.duration,
-      results: scan.results,
-    });
-    fs.writeFile(metaPath, metadata, {mode: 0o600, encoding: 'utf-8'}, (err) => {
-      err ? console.error(err) : null;
+  private async saveMetadata(scanDir: string) {
+    return new Promise((resolve, reject) => {
+      const metaPath = path.join(scanDir, 'metadata.json');
+      fs.writeFile(metaPath, JSON.stringify(this.scan), {mode: 0o600, encoding: 'utf-8'}, (err) => {
+        err ? reject(err) : resolve();
+        this.scan$.next(this.scan);
+      });
     });
   }
 
-  private executeQueue(scanDir: string, tasks: string[]): Promise<ScanResult[]> {
+  private executeQueue(scanDir: string, tasks: string[]): Promise<null> {
     let numOfWorkers = 0;
     let taskIndex = 0;
-    const results: ScanResult[] = new Array(tasks.length);
 
     return new Promise((complete) => {
 
       const handleResult = (index: number, screenshot: Screenshot) => {
-        console.log(`handleResult()`);
+        console.log(`handleResult() for ${index}`);
         const taskId = uuid().toString();
-        results[index] = {
+        this.scan.results[index] = {
           id: taskId,
           target: screenshot.target,
           error: screenshot.error,
         };
-        const data = JSON.stringify({
-          id: taskId,
-          target: screenshot.target,
-          image: screenshot.image ? screenshot.image.toDataURL() : '',
-          error: screenshot.error,
-        });
-        const filePath = path.join(scanDir, `${taskId}.json`);
         const filePNG = path.join(scanDir, `${taskId}.png`);
-        console.log(`Saving result for ${screenshot.target} to ${filePath}`);
-        fs.writeFile(filePath, data, {mode: 0o600, encoding: 'utf-8'}, (err) => {
-          err ? console.error(err) : null;
-        });
-        const imageData = screenshot.image ? screenshot.image.toPNG() : new Buffer('');
+        const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
         fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err) => {
           err ? console.error(err) : null;
         });
@@ -138,16 +133,17 @@ export class ElectricScanner {
       const getNextTask = () => {
         console.log(`getNextTask() - Task ${taskIndex} of ${tasks.length} - Workers: ${numOfWorkers} (Max: ${this.maxNumOfWorkers})`);
         if (numOfWorkers < this.maxNumOfWorkers && taskIndex < tasks.length) {
-          this.capture(tasks[taskIndex]).then((result) => { 
-            handleResult(taskIndex, result); // Success
+          const index = taskIndex;
+          this.capture(tasks[index]).then((result) => { 
+            handleResult(index, result); // Success
           }).catch((result) => {
-            handleResult(taskIndex, result); // Failure
+            handleResult(index, result); // Failure
           });
           taskIndex++;
           numOfWorkers++;
           getNextTask();
         } else if (numOfWorkers === 0 && taskIndex === tasks.length) {
-          complete(results);
+          complete();
         }
       };
 
