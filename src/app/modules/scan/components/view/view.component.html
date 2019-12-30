@@ -1,4 +1,11 @@
-<div [@fadeInOut] class="content-container">
-    <p>view works!</p>
-</div>
+<div [@fadeInOut]>
+  <div *ngIf="!isComplete()">
+    Working ...
+  </div>
 
+  <div *ngIf="scan" class="results-container">
+    <div *ngFor="let result of results()">
+      <img class="results-screenshot" [src]="result.id | scanUrl: this.scan.id" />
+    </div>
+  </div>
+</div>

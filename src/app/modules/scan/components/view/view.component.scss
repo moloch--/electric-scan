@@ -1,0 +1,13 @@
+.results-container {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    
+    grid-template-rows: minmax(250px, auto);
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 1em;
+}
+
+.results-screenshot {
+    max-width: 100%;
+}

@@ -53,8 +53,8 @@ export class NewComponent implements OnInit {
     const height = Number(this.startScanForm.controls['height'].value);
     const margin = Number(this.startScanForm.controls['margin'].value);
     const targets = this.parseTargets(this.startScanForm.controls['targets'].value);
-    const scanId = await this._scannerService.electricScan(name, targets, workers, width, height, margin);
-    this._router.navigate(['scan', 'view', scanId]);
+    const scan = await this._scannerService.StartScan(name, targets, workers, width, height, margin);
+    this._router.navigate(['scan', 'view', scan['id']]);
   }
   
   parseTargets(rawTargets: string): string[] {

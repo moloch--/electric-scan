@@ -38,6 +38,7 @@ interface IPCMessage {
 export class IPCService {
 
   private _ipcResponse$ = new Subject<IPCMessage>();
+  ipcPush$ = new Subject<Object>();
 
   constructor() {
     window.addEventListener('message', (ipcEvent) => {
@@ -46,7 +47,7 @@ export class IPCService {
         if (msg.type === 'response') {
           this._ipcResponse$.next(msg);
         } else if (msg.type === 'push') {
-          console.log(msg);
+          this.ipcPush$.next(JSON.parse(msg.data));
         }
       } catch (err) {
         console.error(`[IPCService] ${err}`);

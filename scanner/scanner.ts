@@ -55,13 +55,14 @@ export class ElectricScanner {
   public margin: number = 100;
   public scan$: BehaviorSubject<Scan>;
   public scan: Scan;
-
+  
+  private _scanDir: string;
   private _started: Date;
 
   constructor(private maxNumOfWorkers = 8) { }
 
   private unique(targets: string[]): string[] {
-    targets = targets.map(target => target.trim()).filter(t => t.length);
+    targets = targets.map(t => t.trim()).filter(t => t.length);
     return targets.filter((elem, index, self) => {
       return index === self.indexOf(elem);
     });
@@ -79,27 +80,27 @@ export class ElectricScanner {
     };
     console.log(`Starting new scan with id ${this.scan.id}`)
     console.log(`Max number of workers: ${this.maxNumOfWorkers}`);
-    const scanDir = path.join(parentDir, this.scan.id);
-    if (!fs.existsSync(scanDir)) {
-      fs.mkdirSync(scanDir, {mode: 0o700, recursive: true});
-      console.log(`Created scan directory: ${scanDir}`);
+    this._scanDir = path.join(parentDir, this.scan.id);
+    if (!fs.existsSync(this._scanDir)) {
+      fs.mkdirSync(this._scanDir, {mode: 0o700, recursive: true});
+      console.log(`Created scan directory: ${this._scanDir}`);
     }
     this.scan$ = new BehaviorSubject(this.scan);
-    await this.saveMetadata(scanDir);
+    await this.saveMetadata();
     setImmediate(async () => {
       console.log(`Scanning ${tasks.length} target(s) ...`);
-      await this.executeQueue(scanDir, tasks);
+      await this.executeQueue(tasks);
       this.scan.duration = new Date().getTime() - this._started.getTime();
       console.log(`Scan completed: ${this.scan.duration}`);
-      await this.saveMetadata(scanDir);
+      await this.saveMetadata();
       this.scan$.complete();
     });
     return this.scan$;
   }
 
-  private async saveMetadata(scanDir: string) {
+  private async saveMetadata() {
     return new Promise((resolve, reject) => {
-      const metaPath = path.join(scanDir, 'metadata.json');
+      const metaPath = path.join(this._scanDir, 'metadata.json');
       fs.writeFile(metaPath, JSON.stringify(this.scan), {mode: 0o600, encoding: 'utf-8'}, (err) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);
@@ -107,7 +108,7 @@ export class ElectricScanner {
     });
   }
 
-  private executeQueue(scanDir: string, tasks: string[]): Promise<null> {
+  private executeQueue(tasks: string[]): Promise<null> {
     let numOfWorkers = 0;
     let taskIndex = 0;
 
@@ -121,11 +122,12 @@ export class ElectricScanner {
           target: screenshot.target,
           error: screenshot.error,
         };
-        const filePNG = path.join(scanDir, `${taskId}.png`);
+        const filePNG = path.join(this._scanDir, `${taskId}.png`);
         const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
         fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err) => {
           err ? console.error(err) : null;
         });
+        this.saveMetadata();
         numOfWorkers--;
         getNextTask();
       };

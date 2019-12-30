@@ -20,7 +20,7 @@ export class HistoryComponent implements OnInit {
   }
 
   async fetch() {
-    this.history = await this._scannerService.electricList();
+    this.history = await this._scannerService.ListScans();
     console.log(this.history);
   }
 

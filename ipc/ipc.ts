@@ -114,18 +114,14 @@ export class IPCHandlers {
 
   private static async readMetadata(scanPath: string): Promise<any> {
     return new Promise((resolve) => {
-      fs.readFile(path.join(scanPath, 'metadata.json'), (err, data) => {
+      const metaPath = path.join(scanPath, 'metadata.json');
+      console.log(`[readMetadata] ${metaPath}`);
+      fs.readFile(metaPath, (err, data) => {
         if (err) {
-          return resolve(null);
+          resolve(null);
+        } else {
+          resolve(JSON.parse(data.toString()));
         }
-        const metadata = JSON.parse(data.toString());
-        fs.readdir(scanPath, (err, ls) => {
-          if (err) {
-            return resolve(null);
-          }
-          metadata['screenshots'] = ls;
-          resolve(metadata);
-        });
       });
     });
   }
@@ -139,7 +135,6 @@ export class IPCHandlers {
         const results = {};
         for (let index = 0; index < ls.length; ++index) {
           const scanId = ls[index];
-          console.log(`scanId = ${scanId}`);
           const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, scanId));
           results[scanId] = meta;
         }
@@ -192,7 +187,7 @@ export class IPCHandlers {
       delete SCANS[scanner.scan.id];
       subscription.unsubscribe();
     });
-    return JSON.stringify({ scan: scanner.scan.id });
+    return JSON.stringify({ id: scanner.scan.id });
   }
 
   @jsonSchema({
@@ -201,19 +196,15 @@ export class IPCHandlers {
     },
     "required": ["scan"],
   })
-  static electric_status(req: string): Promise<string> {
-    const scanId = JSON.parse(req)['scan'];
+  static electric_metadata(req: string): Promise<string> {
+    const metadataReq = JSON.parse(req);
     return new Promise(async (resolve, reject) => {
-      const scanSubject = SCANS[scanId];
-      if (scanSubject) {
-        const subscription = scanSubject.subscribe((scan: Scan) => {
-          resolve(JSON.stringify(scan));
-          subscription.unsubscribe();
-        });
-      } else {
-        const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, scanId));
-        meta ? resolve(meta) : reject('Scan does not exist');
-      }
+      const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, metadataReq.id));
+      if (meta) {
+        resolve(JSON.stringify(meta));
+       } else {
+        reject(`Scan '${metadataReq.id}' does not exist`);
+       }
     });
   }
 

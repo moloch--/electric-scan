@@ -18,8 +18,24 @@
 */
 
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 import { IPCService } from './ipc.service';
+
+
+export interface ScanResult {
+  id: string;
+  target: string;
+  error: string;
+}
+
+export interface Scan {
+  id: string;
+  name: string;
+  results: ScanResult[];
+  started: number;
+  duration: number;
+}
 
 
 @Injectable({
@@ -27,9 +43,15 @@ import { IPCService } from './ipc.service';
 })
 export class ScannerService {
 
-  constructor(private _ipc: IPCService) { }
+  scans$ = new Subject<Scan>();
 
-  async electricScan(name: string, targets: string[], workers: number, width: number, height: number, margin: number): Promise<string> {
+  constructor(private _ipc: IPCService) { 
+    this._ipc.ipcPush$.subscribe((scan: Scan) => {
+      this.scans$.next(scan);
+    });
+  }
+
+  async StartScan(name: string, targets: string[], workers: number, width: number, height: number, margin: number): Promise<Object> {
     const resp = await this._ipc.request(`electric_scan`, JSON.stringify({
       name: name,
       width: width,
@@ -38,12 +60,34 @@ export class ScannerService {
       targets: targets,
       maxWorkers: workers,
     }));
-    return resp;
+    try {
+      return JSON.parse(resp);
+    } catch (err) {
+      console.error('Error parsing StartScan response');
+      console.error(err);
+    }
   }
 
-  async electricList(): Promise<Object> {
-    const ls = await this._ipc.request('electric_list', '');
-    return JSON.parse(ls);
+  async GetScan(scanId: string): Promise<Scan> {
+    const resp = await this._ipc.request('electric_metadata', JSON.stringify({
+      id: scanId,
+    }));
+    try {
+      return JSON.parse(resp);
+    } catch (err) {
+      console.error(`Error parsing GetScan response: ${resp}`);
+      console.error(err);
+    }
+  }
+
+  async ListScans(): Promise<Scan[]> {
+    const resp = await this._ipc.request('electric_list', '');
+    try {
+      return JSON.parse(resp);
+    } catch (err) {
+      console.error('Error parsing ListScans response');
+      console.error(err);
+    }
   }
 
 }

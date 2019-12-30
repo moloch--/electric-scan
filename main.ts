@@ -18,7 +18,7 @@
 */
 
 import { app, BrowserWindow, screen, protocol } from 'electron';
-const { nativeTheme } = require('electron');
+import { nativeTheme } from 'electron';
 import * as path from 'path';
 
 import { startIPCHandlers } from './ipc/ipc';
@@ -89,6 +89,11 @@ try {
     protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler, (err) => {
       if (err) {
         console.error(`[app-protocol] Error: ${err}`);
+      }
+    });
+    protocol.registerBufferProtocol(ScanProtocol.scheme, ScanProtocol.requestHandler, (err) => {
+      if (err) {
+        console.error(`[scan-protocol] Error: ${err}`);
       }
     });
     createMainWindow();
