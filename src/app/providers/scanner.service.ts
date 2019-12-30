@@ -83,7 +83,7 @@ export class ScannerService {
   async ListScans(): Promise<Scan[]> {
     const resp = await this._ipc.request('electric_list', '');
     try {
-      return JSON.parse(resp);
+      return JSON.parse(resp).scans;
     } catch (err) {
       console.error('Error parsing ListScans response');
       console.error(err);

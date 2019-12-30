@@ -15,3 +15,16 @@ export class ScanUrlPipe implements PipeTransform {
   }
 
 }
+
+@Pipe({
+  name: 'date'
+})
+export class DatePipe implements PipeTransform {
+
+  constructor() { }
+
+  transform(started: string) {
+    return new Date(started).toLocaleString("en-US");
+  }
+
+}

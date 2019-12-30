@@ -132,13 +132,16 @@ export class IPCHandlers {
         if (err) {
           return reject(err);
         }
-        const results = {};
+        const results = [];
         for (let index = 0; index < ls.length; ++index) {
           const scanId = ls[index];
+          if (scanId.startsWith('.')) {
+            continue;
+          }
           const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, scanId));
-          results[scanId] = meta;
+          results.push(meta);
         }
-        resolve(JSON.stringify(results));
+        resolve(JSON.stringify({ scans: results }));
       });
     });
   }

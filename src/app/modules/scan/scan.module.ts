@@ -9,11 +9,17 @@ import { NewComponent } from './components/new/new.component';
 import { HistoryComponent } from './components/history/history.component';
 import { ViewComponent } from './components/view/view.component';
 
-import { ScanUrlPipe } from './scan.pipes';
+import { ScanUrlPipe, DatePipe } from './scan.pipes';
 
 
 @NgModule({
-  declarations: [NewComponent, HistoryComponent, ViewComponent, ScanUrlPipe],
+  declarations: [
+    NewComponent,
+    HistoryComponent,
+    ViewComponent, 
+    ScanUrlPipe,
+    DatePipe
+  ],
   imports: [
     CommonModule,
     FormsModule,
