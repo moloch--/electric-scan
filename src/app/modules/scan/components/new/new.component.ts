@@ -58,9 +58,18 @@ export class NewComponent implements OnInit {
   }
   
   parseTargets(rawTargets: string): string[] {
-    return rawTargets.split('\n')
+    const targets = rawTargets.split('\n')
       .map(target => target.trim())
+      .map(target => target.toLowerCase())
       .filter(t => t.length);
+    // Check to see if everything has "http:" or "https:" prefix since
+    // an HTTP 302 -> https: is probably a thing we default to http:
+    for (let index = 0; index < targets.length; ++index) {
+      if (!['https:', 'http:'].some(p => targets[index].startsWith(p))) {
+        targets[index] = `http://${targets[index]}`;
+      }
+    }
+    return targets;
   }
 
 }

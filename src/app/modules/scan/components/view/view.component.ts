@@ -25,11 +25,10 @@ export class ViewComponent implements OnInit {
   ngOnInit() {
     this._route.params.subscribe((params) => {
       this.scanId = params['scan-id'];
-      console.log(`ScanID = '${this.scanId}'`);
       this.fetchScan();
       this._scanSub = this._scannerService.scans$.subscribe((scan) => {
         if (scan.id === this.scanId) {
-          this.fetchScan();
+          this.scan = scan;
         }
       });
     });
@@ -44,9 +43,7 @@ export class ViewComponent implements OnInit {
   }
 
   async fetchScan() {
-    console.log('Fetching scan data ...');
     this.scan = await this._scannerService.GetScan(this.scanId);
-    console.log(this.scan);
   }
 
   results() {
