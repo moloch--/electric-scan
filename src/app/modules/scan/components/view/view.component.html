@@ -1,11 +1,56 @@
 <div [@fadeInOut]>
-  <div *ngIf="!isComplete()">
-    Working ...
+
+  <div *ngIf="!scan">
+    Loading ...
   </div>
 
-  <div *ngIf="scan" class="results-container">
+  <div *ngIf="scan && !isComplete()">
+    Working ...
+  </div>
+  <div *ngIf="scan && isComplete()">
+    Name: {{ scan.name }} <br />
+    Started: {{ scan.started | date}} <br />
+    Duration: {{ scan.duration }}ms <br />
+  </div>
+  <div *ngIf="scan" class="results-container"
+      infiniteScroll
+      [infiniteScrollDistance]="2"
+      [infiniteScrollThrottle]="50"
+      (scrolled)="onScroll()">
+
     <div *ngFor="let result of results()">
-      <img class="results-screenshot" [src]="result.id | scanUrl: this.scan.id" />
+
+      <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
+        <mat-card-header>
+          <mat-card-title>{{ result.target | urlTitle }}</mat-card-title>
+          <mat-card-subtitle class="monospace">
+            {{ result.target }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <img mat-card-image [src]="result.id | scanUrl: this.scan.id" alt="{{ result.target }}">
+        <div>
+          <i class="fa fa-fw fa-2x fa-search"></i>
+        </div>
+      </mat-card>
     </div>
   </div>
 </div>
+
+<div style="visibility: hidden; position: fixed"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  [matMenuTriggerFor]="contextMenu">
+</div>
+<mat-menu #contextMenu="matMenu">
+  <ng-template matMenuContent let-item="item">
+    <button mat-menu-item (click)="details(item)">
+      View Details
+    </button>
+    <button mat-menu-item (click)="saveAs(item)">
+      Save As
+    </button>
+    <button mat-menu-item (click)="openUrl(item)">
+      Open URL
+    </button>
+  </ng-template>
+</mat-menu>

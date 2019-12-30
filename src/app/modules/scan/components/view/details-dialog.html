@@ -1,0 +1,18 @@
+<h1 mat-dialog-title>
+  <i class="fas fa-fw fa-info"></i>
+  {{ result.target }}
+</h1>
+<div mat-dialog-content>
+  <img style="width: 100%;" [src]="result.id | scanUrl: this.scan.id">
+</div>
+<div mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="data" color="primary">
+    Save As
+  </button>
+  <button mat-button [mat-dialog-close]="data" color="warn">
+    Open URL
+  </button>
+  <button mat-button (click)="onNoClick()">
+    Cancel
+  </button>
+</div>

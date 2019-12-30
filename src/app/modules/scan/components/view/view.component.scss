@@ -6,8 +6,31 @@
     grid-template-rows: minmax(250px, auto);
     grid-template-columns: 1fr 1fr 1fr;
     grid-gap: 1em;
+    margin: 1em;
 }
 
-.results-screenshot {
+.result-card {
     max-width: 100%;
+}
+
+.result-card:hover {
+    background-color: #f5f5f5;
+}
+
+.result-card:hover img {
+    opacity: .5;
+}
+
+.result-card:hover div {
+    display: block;
+}
+
+.result-card > div {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    z-index: 10;
 }

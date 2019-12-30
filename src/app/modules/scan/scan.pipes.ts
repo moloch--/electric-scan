@@ -28,3 +28,17 @@ export class DatePipe implements PipeTransform {
   }
 
 }
+
+@Pipe({
+  name: 'urlTitle'
+})
+export class UrlTitlePipe implements PipeTransform {
+
+  constructor() { }
+
+  transform(url: string) {
+    const hostname = new URL(url).hostname;
+    return hostname[0].toUpperCase() + hostname.slice(1);
+  }
+
+}
