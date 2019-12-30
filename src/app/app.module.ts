@@ -35,6 +35,7 @@ import { ScanModuleRouting } from './modules/scan/scan.routes';
 import { IPCService } from './providers/ipc.service';
 import { FileSystemService } from './providers/filesystem.service';
 import { ScannerService } from './providers/scanner.service';
+import { ClientService } from '@app/providers/client.service';
 
 import { AppComponent } from './app.component';
 import { TopMenuComponent } from './components/top-menu/top-menu.component';
@@ -65,7 +66,7 @@ import { SettingsComponent } from './components/settings/settings.component';
     ScanModule,
     SharedModule,
   ],
-  providers: [IPCService, FileSystemService, ScannerService],
+  providers: [IPCService, FileSystemService, ScannerService, ClientService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

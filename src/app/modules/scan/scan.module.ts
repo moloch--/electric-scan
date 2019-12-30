@@ -7,7 +7,9 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { BaseMaterialModule } from '@app/base-material';
 import { NewComponent } from './components/new/new.component';
 import { HistoryComponent } from './components/history/history.component';
-import { ViewComponent, DetailsDialogComponent } from './components/view/view.component';
+import { 
+  ViewComponent, DetailsDialogComponent, OpenUrlDialogComponent
+} from './components/view/view.component';
 import { ScanUrlPipe, UrlTitlePipe, DatePipe } from './scan.pipes';
 
 
@@ -17,6 +19,7 @@ import { ScanUrlPipe, UrlTitlePipe, DatePipe } from './scan.pipes';
     HistoryComponent,
     ViewComponent, 
     DetailsDialogComponent,
+    OpenUrlDialogComponent,
 
     ScanUrlPipe,
     UrlTitlePipe,
@@ -30,6 +33,9 @@ import { ScanUrlPipe, UrlTitlePipe, DatePipe } from './scan.pipes';
     BrowserAnimationsModule,
     InfiniteScrollModule
   ],
-  entryComponents: [DetailsDialogComponent]
+  entryComponents: [
+    DetailsDialogComponent,
+    OpenUrlDialogComponent,
+  ]
 })
 export class ScanModule { }

@@ -14,7 +14,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { IPCService } from '@app/providers/ipc.service';
+import { ClientService } from '@app/providers/client.service';
 
 
 
@@ -26,12 +26,12 @@ import { IPCService } from '@app/providers/ipc.service';
 export class TopMenuComponent implements OnInit {
 
 
-  constructor(private _ipcService: IPCService) { }
+  constructor(private _clientService: ClientService) { }
 
   ngOnInit() { }
 
   onExit() {
-    this._ipcService.request('client_exit', '');
+    this._clientService.exit();
   }
   
 }

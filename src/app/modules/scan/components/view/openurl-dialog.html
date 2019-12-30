@@ -1,0 +1,20 @@
+<h1 mat-dialog-title>
+  <i class="fas fa-fw fa-biohazard"></i>
+  WARNING
+  <button mat-button style="float: right;" (click)="onNoClick()">
+    <i class="fas fa-fw fa-times"></i>
+  </button>
+</h1>
+<div mat-dialog-content>
+  <p>
+    Are you sure you want to open <span class="monospace">{{ result.target }}</span>
+  </p>
+</div>
+<div mat-dialog-actions>
+  <button mat-button color="warn" [mat-dialog-close]="data">
+    Open
+  </button>
+  <button mat-button (click)="onNoClick()">
+    Cancel
+  </button>
+</div>

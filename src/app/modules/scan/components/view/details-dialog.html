@@ -1,15 +1,21 @@
-<h1 mat-dialog-title>
+<h1 mat-dialog-title class="monospace">
   <i class="fas fa-fw fa-info"></i>
   {{ result.target }}
+  <button mat-button style="float: right;" (click)="onNoClick()">
+    <i class="fas fa-fw fa-times"></i>
+  </button>
 </h1>
 <div mat-dialog-content>
-  <img style="width: 100%;" [src]="result.id | scanUrl: this.scan.id">
+  <img *ngIf="result.error === ''" style="width: 100%;" [src]="result.id | scanUrl: this.scan.id">
+  <p *ngIf="result.error !== ''">
+    Error: {{ result.error }}
+  </p>
 </div>
 <div mat-dialog-actions>
-  <button mat-button [mat-dialog-close]="data" color="primary">
+  <button [disabled]="result.error !== ''" mat-button (click)="saveAs(result)" color="primary">
     Save As
   </button>
-  <button mat-button [mat-dialog-close]="data" color="warn">
+  <button [disabled]="result.error !== ''"  mat-button (click)="openUrl(result)" color="warn">
     Open URL
   </button>
   <button mat-button (click)="onNoClick()">

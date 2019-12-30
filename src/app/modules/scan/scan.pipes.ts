@@ -37,8 +37,12 @@ export class UrlTitlePipe implements PipeTransform {
   constructor() { }
 
   transform(url: string) {
-    const hostname = new URL(url).hostname;
-    return hostname[0].toUpperCase() + hostname.slice(1);
+    try {
+      const hostname = new URL(url).hostname;
+      return hostname[0].toUpperCase() + hostname.slice(1).toLowerCase();
+    } catch (err) {
+      return url[0].toUpperCase() + url.slice(1).toLowerCase();
+    }
   }
 
 }

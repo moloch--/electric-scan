@@ -101,7 +101,9 @@ export class ElectricScanner {
   private async saveMetadata() {
     return new Promise((resolve, reject) => {
       const metaPath = path.join(this._scanDir, 'metadata.json');
-      fs.writeFile(metaPath, JSON.stringify(this.scan), {mode: 0o600, encoding: 'utf-8'}, (err) => {
+      const data = JSON.stringify(this.scan);
+      console.log(`[save metadata] ${metaPath}: '${data}'`);
+      fs.writeFile(metaPath, data, {mode: 0o600}, (err) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);
       });
@@ -114,20 +116,22 @@ export class ElectricScanner {
 
     return new Promise((complete) => {
 
-      const handleResult = (index: number, screenshot: Screenshot) => {
+      const handleResult = async (index: number, screenshot: Screenshot) => {
         console.log(`handleResult() for ${index}`);
         const taskId = uuid().toString();
+        if (screenshot.image) {
+          const filePNG = path.join(this._scanDir, `${taskId}.png`);
+          const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
+          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err) => {
+            err ? console.error(err) : null;
+          });
+        }
         this.scan.results[index] = {
           id: taskId,
           target: screenshot.target,
           error: screenshot.error,
         };
-        const filePNG = path.join(this._scanDir, `${taskId}.png`);
-        const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
-        fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err) => {
-          err ? console.error(err) : null;
-        });
-        this.saveMetadata();
+        await this.saveMetadata();
         numOfWorkers--;
         getNextTask();
       };
@@ -154,9 +158,8 @@ export class ElectricScanner {
   }
 
   private async capture(target: string): Promise<Screenshot> {
-
     const targetURL = new URL(target);
-    console.log(`Screen capture: ${targetURL.toString()}`);
+    console.log(`Screenshot: ${targetURL.toString()}`);
     if (targetURL.protocol !== 'http:' && targetURL.protocol !== 'https:') {
       return Promise.reject({
         target: targetURL.toString(),
@@ -164,44 +167,48 @@ export class ElectricScanner {
         error: `Invalid protocol '${targetURL.protocol}'`
       });
     }
-  
     let scanWindow = this.scanWindow(this.width, this.height);
     scanWindow.on('closed', () => {
       scanWindow = null;
     });
-    scanWindow.loadURL(targetURL.toString());
     
+    let result: Screenshot;
     try {
-      const image: NativeImage = await new Promise((resolve, reject) => {
-        // Set timeout and clear it if we get a 'dom-ready'
-        const timeoutErr = setTimeout(() => {
-          scanWindow.close();
-          reject('timeout');
-        }, this.timeout);
-        scanWindow.webContents.once('dom-ready', () => {
-          // We got a 'dom-ready' wait 'margin' ms before capturePage()
-          console.log(`DOM ready for ${targetURL.toString()}`);
-          clearTimeout(timeoutErr);
-          setTimeout(async () => {
-            const image = await scanWindow.capturePage();
-            scanWindow.close();
-            resolve(image);
-          }, this.margin);
-        });
-      });
-      return {
+      const image = await this.screenshot(scanWindow, targetURL);
+      result = {
         target: targetURL.toString(),
         image: image,
-        error: '',
+        error: image.isEmpty() ? 'No result' : '',
       };
     } catch (err) {
-      return {
+      result = {
         target: targetURL.toString(),
         image: null,
-        error: err,
+        error: err.code,
       };
+    } finally {
+      scanWindow.close();
     }
+    return result;
+  }
 
+  private screenshot(scanWindow: BrowserWindow, targetURL: URL): Promise<NativeImage> {
+    return new Promise(async (resolve, reject) => {
+      const timeoutErr = setTimeout(() => {
+        reject({code: 'Request timeout'});
+      }, this.timeout);
+      try {
+        await scanWindow.loadURL(targetURL.toString());
+        console.log(`did-finish-load: ${targetURL.toString()}`);
+        clearTimeout(timeoutErr);
+        setTimeout(async () => {
+          const image = await scanWindow.capturePage();
+          resolve(image);
+        }, this.margin);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   private scanWindow(width: number, height: number): BrowserWindow {

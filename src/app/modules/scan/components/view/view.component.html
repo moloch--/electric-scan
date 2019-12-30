@@ -27,7 +27,10 @@
             {{ result.target }}
           </mat-card-subtitle>
         </mat-card-header>
-        <img mat-card-image [src]="result.id | scanUrl: this.scan.id" alt="{{ result.target }}">
+        <img *ngIf="result.error === ''" mat-card-image [src]="result.id | scanUrl: this.scan.id">
+        <p *ngIf="result.error">
+          {{ result.error }}
+        </p>
         <div>
           <i class="fa fa-fw fa-2x fa-search"></i>
         </div>

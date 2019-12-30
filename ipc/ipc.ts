@@ -22,9 +22,9 @@ listing/selecting configs to the sandboxed code.
 
 */
 
-import { ipcMain, dialog, FileFilter, BrowserWindow, IpcMainEvent } from 'electron';
+import { ipcMain, FileFilter, BrowserWindow, IpcMainEvent, dialog } from 'electron';
 import { homedir } from 'os';
-import * as base64 from 'base64-arraybuffer';
+import { shell } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -67,49 +67,75 @@ export class IPCHandlers {
 
   @jsonSchema({
     "properties": {
-      "title": { "type": "string", "minLength": 1, "maxLength": 100 },
-      "message": { "type": "string", "minLength": 1, "maxLength": 100 },
-      "openDirectory": { "type": "boolean" },
-      "multiSelections": { "type": "boolean" },
-      "filter": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": { "type": "string" },
-            "extensions": {
-              "type": "array",
-              "items": { "type": "string" }
-            }
-          }
-        }
-      }
+      "url": { "type": "string", "minLength": 1, "maxLength": 2048 },
     },
-    "required": ["title", "message"]
+    "required": ["url"]
   })
-  static async fs_readFile(req: string): Promise<string> {
-    const readFileReq: ReadFileReq = JSON.parse(req);
-    const dialogOptions = {
-      title: readFileReq.title,
-      message: readFileReq.message,
-      openDirectory: readFileReq.openDirectory,
-      multiSelections: readFileReq.multiSelections
-    };
-    const files = [];
-    const open = await dialog.showOpenDialog(null, dialogOptions);
-    await Promise.all(open.filePaths.map((filePath) => {
-      return new Promise(async (resolve) => {
-        fs.readFile(filePath, (err, data) => {
-          files.push({
-            filePath: filePath,
-            error: err ? err.toString() : null,
-            data: data ? base64.encode(data) : null
-          });
-          resolve(); // Failures get stored in `files` array
-        });
-      });
-    }));
-    return JSON.stringify({ files: files });
+  static async client_openUrl(req: string): Promise<string> {
+    try {
+      const openUrlReq = JSON.parse(req);
+      const url = new URL(openUrlReq.url);
+      if (["http:", "https:"].some(p => p === url.protocol)) {
+        console.log(`[open url] ${url.toString()}`);
+        shell.openExternal(url.toString());
+      }
+      return url.toString();
+    } catch(err) {
+      console.error(err);
+      return Promise.reject(`Failed to open url: ${req}`)
+    }
+  }
+
+  @jsonSchema({
+    "properties": {
+      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+    },
+    "required": ["scan"]
+  })
+  static async client_openScanFolder(req: string): Promise<string> {
+    try {
+      const openScanReq = JSON.parse(req);
+      const scanId = path.basename(openScanReq.scan);
+      const scanPath = path.join(SCANS_DIR, scanId);
+      if (fs.existsSync(scanPath)) {
+        shell.showItemInFolder(scanPath);
+      }
+      return scanId;
+    } catch(err) {
+      console.error(err);
+      return Promise.reject(`Failed to open scan folder: ${req}`)
+    }
+  }
+
+  @jsonSchema({
+    "properties": {
+      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "result": { "type": "string", "minLength": 1, "maxLength": 36 },
+    },
+    "required": ["scan", "result"]
+  })
+  static async client_saveImageAs(req: string): Promise<string> {
+    try {
+      const saveImageReq = JSON.parse(req);
+      const scanId = path.basename(saveImageReq.scan);
+      const resultId = path.basename(saveImageReq.result);
+      const src = path.join(SCANS_DIR, scanId, `${resultId}.png`);
+      if (fs.existsSync(src)) {
+        const dialogOptions = {
+          title: 'Save Image As ...',
+          message: 'Save screenshot file',
+          defaultPath: path.join(homedir(), 'Desktop', 'Untitled.png'),
+        };
+        const dst = await dialog.showSaveDialog(dialogOptions);
+        if (!dst.canceled) {
+          console.log(`[save image] ${dst.filePath}`);
+          fs.copyFile(src, dst.filePath, (err) => { err ? console.error(err) : null }); 
+        }
+        return JSON.stringify({ success: true });
+      }
+    } catch(err) {
+      return Promise.reject(err);
+    }
   }
 
   private static async readMetadata(scanPath: string): Promise<any> {
@@ -120,7 +146,12 @@ export class IPCHandlers {
         if (err) {
           resolve(null);
         } else {
-          resolve(JSON.parse(data.toString()));
+          try {
+            resolve(JSON.parse(data.toString()));
+          } catch (err) {
+            console.error(`[JSON Error]: ${err}`);
+            resolve(null);
+          }
         }
       });
     });
@@ -139,7 +170,7 @@ export class IPCHandlers {
             continue;
           }
           const meta = await IPCHandlers.readMetadata(path.join(SCANS_DIR, scanId));
-          results.push(meta);
+          meta ? results.push(meta) : null;
         }
         resolve(JSON.stringify({ scans: results }));
       });
@@ -195,7 +226,7 @@ export class IPCHandlers {
 
   @jsonSchema({
     "properties": {
-      "scan": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
     "required": ["scan"],
   })
@@ -208,43 +239,6 @@ export class IPCHandlers {
        } else {
         reject(`Scan '${metadataReq.id}' does not exist`);
        }
-    });
-  }
-
-  @jsonSchema({
-    "properties": {
-      "title": { "type": "string", "minLength": 1, "maxLength": 100 },
-      "message": { "type": "string", "minLength": 1, "maxLength": 100 },
-      "filename": { "type": "string", "minLength": 1 },
-      "data": { "type": "string" }
-    },
-    "required": ["title", "message", "filename", "data"]
-  })
-  static fs_saveFile(req: string): Promise<string> {
-    return new Promise(async (resolve, reject) => {
-      const saveFileReq: SaveFileReq = JSON.parse(req);
-      const dialogOptions = {
-        title: saveFileReq.title,
-        message: saveFileReq.message,
-        defaultPath: path.join(homedir(), 'Downloads', path.basename(saveFileReq.filename)),
-      };
-      const save = await dialog.showSaveDialog(dialogOptions);
-      console.log(`[save file] ${save.filePath}`);
-      if (save.canceled) {
-        return resolve('');  // Must return to stop execution
-      }
-      const fileOptions = {
-        mode: 0o644,
-        encoding: 'binary',
-      };
-      const data = Buffer.from(base64.decode(saveFileReq.data));
-      fs.writeFile(save.filePath, data, fileOptions, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(JSON.stringify({ filename: save.filePath }));
-        }
-      });
     });
   }
 
