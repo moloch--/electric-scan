@@ -21,6 +21,7 @@ import { BrowserWindow, NativeImage } from 'electron';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as writeFileAtomic from 'write-file-atomic';
 import { BehaviorSubject } from 'rxjs';
 
 
@@ -102,8 +103,8 @@ export class ElectricScanner {
     return new Promise((resolve, reject) => {
       const metaPath = path.join(this._scanDir, 'metadata.json');
       const data = JSON.stringify(this.scan);
-      console.log(`[save metadata] ${metaPath}: '${data}'`);
-      fs.writeFile(metaPath, data, {mode: 0o600}, (err) => {
+      // console.log(`[save metadata] ${metaPath}: '${data}'`);
+      writeFileAtomic(metaPath, data, {mode: 0o600}, (err) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);
       });

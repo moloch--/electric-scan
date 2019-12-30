@@ -39,6 +39,9 @@ export class NewComponent implements OnInit {
       height: ['1080', Validators.compose([
         Validators.required,
       ])],
+      timeout: ['15', Validators.compose([
+        Validators.required,
+      ])],
       margin: ['50', Validators.compose([
         Validators.required,
       ])],
@@ -51,9 +54,10 @@ export class NewComponent implements OnInit {
     const workers = Number(this.startScanForm.controls['workers'].value);
     const width = Number(this.startScanForm.controls['width'].value);
     const height = Number(this.startScanForm.controls['height'].value);
+    const timeout = Number(this.startScanForm.controls['timeout'].value) * 1000;
     const margin = Number(this.startScanForm.controls['margin'].value);
     const targets = this.parseTargets(this.startScanForm.controls['targets'].value);
-    const scan = await this._scannerService.StartScan(name, targets, workers, width, height, margin);
+    const scan = await this._scannerService.StartScan(name, targets, workers, width, height, timeout, margin);
     this._router.navigate(['scan', 'view', scan['id']]);
   }
   

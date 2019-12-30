@@ -19,6 +19,7 @@ export class ViewComponent implements OnInit {
 
   scanId: string;
   scan: Scan;
+  progress: number = 0;
   private _scanSub: Subscription;
 
   @ViewChild(MatMenuTrigger, { static: false }) contextMenu: MatMenuTrigger;
@@ -36,6 +37,7 @@ export class ViewComponent implements OnInit {
       this._scanSub = this._scannerService.scans$.subscribe((scan) => {
         if (scan.id === this.scanId) {
           this.scan = scan;
+          this._progress();
         }
       });
     });
@@ -53,8 +55,18 @@ export class ViewComponent implements OnInit {
     return this.scan ? this.scan.duration !== -1 : false;
   }
 
+  private _progress() {
+    if (this.scan) {
+      const completed = this.scan.results.filter(res => res !== null);
+      this.progress = Math.floor((completed.length / this.scan.results.length) * 100.0);
+    } else {
+      this.progress = 0;
+    }
+  }
+
   async fetchScan() {
     this.scan = await this._scannerService.GetScan(this.scanId);
+    this._progress();
   }
 
   results() {

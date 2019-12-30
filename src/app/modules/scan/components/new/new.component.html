@@ -33,6 +33,11 @@
           </p>
           <p>
             <mat-form-field>
+              <input matInput type="number" matTooltip="Timeout in seconds" [formControl]="startScanForm.controls['timeout']" placeholder="Timeout">
+            </mat-form-field>
+          </p>
+          <p>
+            <mat-form-field>
               <input matInput type="number" matTooltip="Number of ms after 'dom-ready' to take screenshot" [formControl]="startScanForm.controls['margin']" placeholder="Margin">
             </mat-form-field>
           </p>

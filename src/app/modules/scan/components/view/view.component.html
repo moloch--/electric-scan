@@ -1,17 +1,19 @@
 <div [@fadeInOut]>
 
   <div *ngIf="!scan">
-    Loading ...
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+  <div *ngIf="scan && !isComplete()">
+    <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
   </div>
 
-  <div *ngIf="scan && !isComplete()">
-    Working ...
-  </div>
   <div *ngIf="scan && isComplete()">
     Name: {{ scan.name }} <br />
     Started: {{ scan.started | date}} <br />
     Duration: {{ scan.duration }}ms <br />
   </div>
+
+
   <div *ngIf="scan" class="results-container"
       infiniteScroll
       [infiniteScrollDistance]="2"

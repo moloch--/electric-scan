@@ -51,11 +51,12 @@ export class ScannerService {
     });
   }
 
-  async StartScan(name: string, targets: string[], workers: number, width: number, height: number, margin: number): Promise<Object> {
+  async StartScan(name: string, targets: string[], workers: number, width: number, height: number, timeout: number, margin: number): Promise<Object> {
     const resp = await this._ipc.request(`electric_scan`, JSON.stringify({
       name: name,
       width: width,
       height: height,
+      timeout: timeout,
       margin: margin,
       targets: targets,
       maxWorkers: workers,
