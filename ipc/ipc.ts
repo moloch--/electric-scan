@@ -29,7 +29,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { jsonSchema } from './jsonschema';
-import { ElectricScanner, Scan } from '../scanner';
+import { ElectricScanner, ScannerSettings } from '../scanner';
 
 
 export interface ReadFileReq {
@@ -252,7 +252,8 @@ export class IPCHandlers {
   static async electric_scan(req: string): Promise<string> {
     const scanReq = JSON.parse(req);
     const workers = scanReq.maxWorkers ? Math.abs(scanReq.maxWorkers || 1) : 8;
-    const scanner = new ElectricScanner(workers);
+    const scanSettings = await IPCHandlers.client_loadSettings('');
+    const scanner = new ElectricScanner(JSON.parse(scanSettings), workers);
     if (scanReq.width) {
       scanner.width = scanReq.width;
     }

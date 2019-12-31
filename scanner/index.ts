@@ -1,1 +1,1 @@
-export { ElectricScanner, Scan } from './scanner';
+export { ElectricScanner, Scan, ScannerSettings } from './scanner';

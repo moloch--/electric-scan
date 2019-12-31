@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import { BrowserWindow, NativeImage } from 'electron';
+import { BrowserWindow, NativeImage, Session, Config } from 'electron';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -48,6 +48,25 @@ export interface Scan {
   duration: number;
 }
 
+export interface ScannerSettings {
+    /* Browser Settings */
+    UserAgent: string;
+    DisableTLSValidation: boolean;
+  
+    /* Proxy Settings */
+    SOCKSProxyEnabled: boolean;
+    SOCKSProxyHostname: string;
+    SOCKSProxyPort: number;
+  
+    HTTPProxyEnabled: boolean;
+    HTTPProxyHostname: string;
+    HTTPProxyPort: number;
+  
+    HTTPSProxyEnabled: boolean;
+    HTTPSProxyHostname: string;
+    HTTPSProxyPort: number;
+}
+
 export class ElectricScanner {
 
   public width: number = 1920;
@@ -56,11 +75,11 @@ export class ElectricScanner {
   public margin: number = 100;
   public scan$: BehaviorSubject<Scan>;
   public scan: Scan;
-  
+
   private _scanDir: string;
   private _started: Date;
 
-  constructor(private maxNumOfWorkers = 8) { }
+  constructor(private settings: ScannerSettings, private maxNumOfWorkers = 8) { }
 
   private unique(targets: string[]): string[] {
     targets = targets.map(t => t.trim()).filter(t => t.length);
@@ -167,7 +186,7 @@ export class ElectricScanner {
         error: `Invalid protocol '${targetURL.protocol}'`
       });
     }
-    let scanWindow = this.scanWindow(this.width, this.height);
+    let scanWindow = await this.createScanWindow(this.width, this.height);
     scanWindow.on('closed', () => {
       scanWindow = null;
     });
@@ -211,8 +230,8 @@ export class ElectricScanner {
     });
   }
 
-  private scanWindow(width: number, height: number): BrowserWindow {
-    return new BrowserWindow({
+  private async createScanWindow(width: number, height: number): Promise<BrowserWindow> {
+    const window = new BrowserWindow({
       width: width,
       height: height,
       show: false,
@@ -230,6 +249,54 @@ export class ElectricScanner {
         safeDialogs: true,
       }
     });
+    window.webContents.session.on('will-download', (event) => {
+      event.preventDefault();
+    });
+    await this.configureSession(window.webContents.session);
+    return window;
+  }
+
+  private async configureSession(session: Session): Promise<void> {
+    
+    // User-agent
+    if (this.settings.UserAgent && this.settings.UserAgent.length) {
+      session.setUserAgent(this.settings.UserAgent);
+    }
+
+    // Disable TLS validation (0 = Accept Cert)
+    if (this.settings.DisableTLSValidation) {
+      session.setCertificateVerifyProc((_, callback) => {
+        callback(0);
+      });
+    }
+
+    // Proxy rules
+    await session.setProxy({
+      pacScript: null,
+      proxyRules: this.proxyRules(),
+      proxyBypassRules: null
+    });
+  }
+
+  private proxyRules(): string {
+    const proxyRules = [];
+    if (this.settings.SOCKSProxyEnabled) {
+      const socksProxy = new URL('socks5://');
+      socksProxy.hostname = this.settings.SOCKSProxyHostname;
+      socksProxy.port = this.settings.SOCKSProxyPort.toString();
+      proxyRules.push(socksProxy.toString());
+    }
+    if (this.settings.HTTPProxyEnabled) {
+      const httpProxy = `http=${this.settings.HTTPProxyHostname}:${this.settings.HTTPProxyPort}`;
+      proxyRules.push(httpProxy);
+    }
+    if (this.settings.HTTPSProxyEnabled) {
+      const httpsProxy = `https=${this.settings.HTTPSProxyHostname}:${this.settings.HTTPSProxyPort}`;
+      proxyRules.push(httpsProxy);
+    }
+    const rules = proxyRules.join(';');
+    console.log(`[proxy rules] ${rules}`);
+    return rules;
   }
 
 }
