@@ -55,9 +55,9 @@ export interface IPCMessage {
 }
 
 const SCANS = {};
-const APP_DIR = path.join(homedir(), '.electric');
-const SCANS_DIR = path.join(APP_DIR, 'scans');
-const SETTINGS_PATH = path.join(APP_DIR, 'settings.json');
+export const APP_DIR = path.join(homedir(), '.electric');
+export const SCANS_DIR = path.join(APP_DIR, 'scans');
+export const SETTINGS_PATH = path.join(APP_DIR, 'settings.json');
 
 
 // IPC Methods used to start/interact with the RPCClient

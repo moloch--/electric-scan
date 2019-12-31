@@ -20,8 +20,9 @@
 import { app, BrowserWindow, screen, protocol } from 'electron';
 import { nativeTheme } from 'electron';
 import * as path from 'path';
+import * as fs from 'fs';
 
-import { startIPCHandlers } from './ipc/ipc';
+import { startIPCHandlers, SCANS_DIR } from './ipc/ipc';
 import * as AppProtocol from './app-protocol';
 import * as ScanProtocol from './scan-protocol';
 
@@ -84,18 +85,14 @@ try {
 
   console.log(`dark mode: ${nativeTheme.shouldUseDarkColors}`);
 
+  if (!fs.existsSync(SCANS_DIR)) {
+    fs.mkdirSync(SCANS_DIR, {recursive: true, mode: 0o700});
+  }
+
   // Custom protocol handler
   app.on('ready', async () => {
-    protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler, (err) => {
-      if (err) {
-        console.error(`[app-protocol] Error: ${err}`);
-      }
-    });
-    protocol.registerBufferProtocol(ScanProtocol.scheme, ScanProtocol.requestHandler, (err) => {
-      if (err) {
-        console.error(`[scan-protocol] Error: ${err}`);
-      }
-    });
+    protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler);
+    protocol.registerBufferProtocol(ScanProtocol.scheme, ScanProtocol.requestHandler);
     createMainWindow();
     startIPCHandlers(mainWindow);
   });

@@ -23,7 +23,6 @@
               "src/favicon.icns",
               "src/favicon.256x256.png",
               "src/favicon.512x512.png"
-
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css",

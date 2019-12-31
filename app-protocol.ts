@@ -44,7 +44,8 @@ const mimeTypes = {
   '.jpg': 'image/jpeg',
   '.map': 'text/plain',
   '.woff': 'application/x-font-woff',
-  '.woff2': 'font/woff2'
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/truetype'
 };
 
 function charset(mimeType: string): string {
@@ -58,6 +59,7 @@ function mime(filename: string): string {
 
 export function requestHandler(req: Electron.Request, next: ProtocolCallback) {
   const reqUrl = new URL(req.url);
+  console.log(`[req] ${reqUrl.toString()}`);
   let reqPath = path.normalize(reqUrl.pathname);
   if (reqPath === '/') {
     reqPath = '/index.html';
@@ -72,7 +74,7 @@ export function requestHandler(req: Electron.Request, next: ProtocolCallback) {
         data: data
       });
     } else {
-      console.error(err);
+      console.error(`[req-err] ${err}`);
     }
   });
 }
