@@ -1,3 +1,9 @@
-# Electric Scan
+# ⚡Electric Scan ⚡
 
-Do the Electric Scan, it's an Electron-based screenshot scanning tool.
+It's Electric (Electron)-based screenshot tool, similar to EyeWitness/GoWitness.
+
+### Features
+* 2x faster than GoWitness
+* SOCKS/HTTP/HTTPS Proxy Support
+
+
