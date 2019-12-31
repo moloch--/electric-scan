@@ -8,23 +8,40 @@
   </div>
 
   <div *ngIf="scan && isComplete()">
-    Name: {{ scan.name }} <br />
-    Started: {{ scan.started | date}} <br />
-    Duration: {{ scan.duration }}ms <br />
-  </div>
+    <mat-toolbar>
+      <span>{{ scan.name }}</span>
+      
+      <span class="fill-remaining-space"></span>
 
+      <button mat-stroked-button (click)="saveAllAs()">
+        <i class="fas fa-fw fa-save"></i>
+        Save All
+      </button>
+  
+      <span class="fill-space"></span>
+
+      <mat-slide-toggle color="primary" [(ngModel)]="hideErrors">
+        <i class="fas fa-fw fa-eye-slash"></i>
+        Hide Errors
+      </mat-slide-toggle>
+
+    </mat-toolbar>
+  </div>
 
   <div *ngIf="scan" class="results-container"
       infiniteScroll
       [infiniteScrollDistance]="2"
-      [infiniteScrollThrottle]="50"
       (scrolled)="onScroll()">
 
-    <div *ngFor="let result of results()">
+    <div *ngFor="let result of displayedResults; let index = index" [attr.data-index]="index">
 
       <mat-card class="result-card" [@fadeInOut] (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
         <mat-card-header>
-          <mat-card-title>{{ result.target | urlTitle }}</mat-card-title>
+          <mat-card-title>
+            <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before" matBadgeColor="primary">
+              {{ result.target | urlTitle }}
+            </span>
+          </mat-card-title>
           <mat-card-subtitle class="monospace">
             {{ result.target }}
           </mat-card-subtitle>

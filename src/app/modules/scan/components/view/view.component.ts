@@ -18,8 +18,14 @@ import { ClientService } from '@app/providers/client.service';
 export class ViewComponent implements OnInit {
 
   scanId: string;
-  scan: Scan;
   progress: number = 0;
+  private _hideErrors = false;
+  displayedResults: ScanResult[];
+
+  page = 1;
+  readonly pageSize = 30;
+
+  private _scan: Scan;
   private _scanSub: Subscription;
 
   @ViewChild(MatMenuTrigger, { static: false }) contextMenu: MatMenuTrigger;
@@ -37,7 +43,7 @@ export class ViewComponent implements OnInit {
       this._scanSub = this._scannerService.scans$.subscribe((scan) => {
         if (scan.id === this.scanId) {
           this.scan = scan;
-          this._progress();
+         
         }
       });
     });
@@ -46,9 +52,29 @@ export class ViewComponent implements OnInit {
   ngOnDestroy() {
     this._scanSub.unsubscribe();
   }
+
+  get scan(): Scan {
+    return this._scan;
+  }
+
+  set scan(scan: Scan) {
+    this._scan = scan;
+    this._progress();
+    this.updateDisplayResults();
+  }
+
+  get hideErrors(): boolean {
+    return this._hideErrors;
+  }
+
+  set hideErrors(hideErrors: boolean) {
+    this._hideErrors = hideErrors;
+    this.updateDisplayResults();
+  }
   
   onScroll() {
-    console.log('scrolled!!');
+    this.page++;
+    this.updateDisplayResults();
   }
 
   isComplete(): boolean {
@@ -66,11 +92,17 @@ export class ViewComponent implements OnInit {
 
   async fetchScan() {
     this.scan = await this._scannerService.GetScan(this.scanId);
-    this._progress();
   }
 
-  results() {
-    return this.scan ? this.scan.results.filter(r => r !== null) : [];
+  updateDisplayResults() {
+    if (!this.scan) {
+      return [];
+    }
+    let completed = this.scan.results.filter(r => r !== null);
+    if (this.hideErrors) {
+      completed = completed.filter(r => r.error === '');
+    }
+    this.displayedResults = completed.slice(0, this.page * this.pageSize);
   }
 
   details(result: ScanResult) {
@@ -87,6 +119,10 @@ export class ViewComponent implements OnInit {
   saveAs(result: ScanResult) {
     console.log(`Save image ${this.scan.id}/${result.id}.png`)
     this._clientService.saveImageAs(this.scan.id, result.id);
+  }
+
+  saveAllAs() {
+    this._clientService.saveAllAs(this.scan.id);
   }
 
   openUrl(result: ScanResult) {

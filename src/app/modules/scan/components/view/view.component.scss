@@ -34,3 +34,12 @@
     height: 70px;
     z-index: 10;
 }
+
+.fill-remaining-space {
+    flex: 1 1 auto;
+}
+
+.fill-space {
+    flex: auto;
+}
+

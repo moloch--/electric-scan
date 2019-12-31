@@ -49,11 +49,10 @@ export class ClientService {
     return JSON.parse(save).success ? true : false; 
   }
 
-  async saveAllAs(scanId: string): Promise<boolean> {
-    const save = await this._ipc.request('client_saveAllAs', JSON.stringify({ 
-        scan: scanId,
+  async saveAllAs(scanId: string): Promise<void> {
+    this._ipc.request('client_saveAllAs', JSON.stringify({ 
+      scan: scanId,
     }));
-    return JSON.parse(save).success ? true : false; 
   }
 
 }

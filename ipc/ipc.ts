@@ -131,6 +131,10 @@ export class IPCHandlers {
           title: 'Save Image As ...',
           message: 'Save screenshot file',
           defaultPath: path.join(homedir(), 'Desktop', 'Untitled.png'),
+          properties: {
+            openFile: true,
+            createDirectory: true,
+          }
         };
         const dst = await dialog.showSaveDialog(dialogOptions);
         if (!dst.canceled) {
@@ -142,6 +146,56 @@ export class IPCHandlers {
     } catch(err) {
       return Promise.reject(err);
     }
+  }
+
+  @jsonSchema({
+    "type": "object",
+    "properties": {
+      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+    },
+    "required": ["scan"]
+  })
+  static async client_saveAllAs(req: string): Promise<string> {
+    try {
+      const saveAllReq = JSON.parse(req);
+      const scanId = path.basename(saveAllReq.scan);
+      const srcDir = path.join(SCANS_DIR, scanId);
+      if (fs.existsSync(srcDir)) {
+        const dialogOptions = {
+          title: 'Save All As ...',
+          message: 'Save all screenshots',
+          defaultPath: path.join(homedir(), 'Desktop'),
+          properties: {
+            openDirectory: true,
+            createDirectory: true,
+          }
+        };
+        const dstDir = await dialog.showSaveDialog(dialogOptions);
+        if (!dstDir.canceled) {
+          if (!fs.existsSync(dstDir.filePath)) {
+            fs.mkdirSync(dstDir.filePath, {mode: 0o700});
+          }
+          const ls = await IPCHandlers.lsDir(srcDir);
+          const pngs = ls.filter(filename => filename.endsWith('.png'));
+          for (let index = 0; index < pngs.length; ++index) {
+            const src = path.join(srcDir, pngs[index]);
+            const dst = path.join(dstDir.filePath, pngs[index]);
+            console.log(`[save all] ${src} -> ${dst}`);
+            fs.copyFile(src, dst, (err) => { err ? console.error(err) : null }); 
+          }
+        }
+      }
+    } catch(err) {
+      return Promise.reject(err);
+    }
+  }
+
+  static async lsDir(dir: string): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      fs.readdir(dir, async (err, nodes) => {
+        err ? reject(err) : resolve(nodes);
+      });
+    });
   }
 
   static async client_loadSettings(_: string): Promise<string> {

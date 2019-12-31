@@ -8,7 +8,8 @@
 <div mat-dialog-content>
   <img *ngIf="result.error === ''" style="width: 100%;" [src]="result.id | scanUrl: this.scan.id">
   <p *ngIf="result.error !== ''">
-    Error: {{ result.error }}
+    <i class="fas fa-fw fa-exclamation-triangle"></i>
+    {{ result.error }}
   </p>
 </div>
 <div mat-dialog-actions>
