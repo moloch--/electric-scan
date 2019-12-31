@@ -22,7 +22,7 @@
 
     <div *ngFor="let result of results()">
 
-      <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
+      <mat-card class="result-card" [@fadeInOut] (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
         <mat-card-header>
           <mat-card-title>{{ result.target | urlTitle }}</mat-card-title>
           <mat-card-subtitle class="monospace">

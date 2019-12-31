@@ -103,7 +103,6 @@ export class ElectricScanner {
     return new Promise((resolve, reject) => {
       const metaPath = path.join(this._scanDir, 'metadata.json');
       const data = JSON.stringify(this.scan);
-      // console.log(`[save metadata] ${metaPath}: '${data}'`);
       writeFileAtomic(metaPath, data, {mode: 0o600}, (err) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);

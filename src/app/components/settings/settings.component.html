@@ -1,3 +1,87 @@
-<div [@fadeInOut] class="content-container">
-    <p>settings works!</p>
+<div [@fadeInOut] *ngIf="settings" class="settings-container">
+
+  <div class="settings-header-container">
+
+    <h1>
+      <i class="fas fa-fw fa-cogs"></i>
+      Settings
+    </h1>
+
+  </div>
+
+  <div class="inner-settings-container">
+
+    <div class="browser-settings-container">
+
+      <h3>Browser Settings</h3>
+
+      <mat-form-field class="wide-mat-form-field">
+        <mat-label>User Agent</mat-label>
+        <input matInput [(ngModel)]="settings.UserAgent" (ngModelChange)="onChange()">
+      </mat-form-field>
+      <mat-checkbox color="warn" [(ngModel)]="settings.DisableTLSValidation" (ngModelChange)="onChange()">
+        <i class="fas fa-fw fa-lock-open"></i>
+        Disable TLS Certificate Validation
+      </mat-checkbox>
+
+    </div>
+
+    <div class="proxy-settings-container">
+
+      <h3>Proxy Settings</h3>
+
+      <div>
+        <mat-checkbox color="primary" [(ngModel)]="settings.SOCKSProxyEnabled" (ngModelChange)="onChange()">
+          Enable SOCKS Proxy
+        </mat-checkbox>
+
+        <mat-form-field class="wide-mat-form-field">
+          <mat-label>SOCKS Proxy Hostname</mat-label>
+          <input matInput [(ngModel)]="settings.SOCKSProxyHostname" (ngModelChange)="onChange()">
+        </mat-form-field>
+
+        <mat-form-field class="wide-mat-form-field">
+          <mat-label>SOCKS Proxy Port</mat-label>
+          <input matInput type="number" [(ngModel)]="settings.SOCKSProxyPort" (ngModelChange)="onChange()">
+        </mat-form-field>
+      </div>
+
+      <div>&nbsp;</div>
+
+      <div>
+        <mat-checkbox color="primary" [(ngModel)]="settings.HTTPProxyEnabled" (ngModelChange)="onChange()">
+          Enable HTTP Proxy
+        </mat-checkbox>
+
+        <mat-form-field class="wide-mat-form-field">
+          <mat-label>HTTP Proxy Hostname</mat-label>
+          <input matInput [(ngModel)]="settings.HTTPProxyHostname" (ngModelChange)="onChange()">
+        </mat-form-field>
+
+        <mat-form-field class="wide-mat-form-field">
+          <mat-label>HTTP Proxy Port</mat-label>
+          <input matInput type="number" [(ngModel)]="settings.HTTPProxyPort" (ngModelChange)="onChange()">
+        </mat-form-field>
+      </div>
+
+      <div>&nbsp;</div>
+
+      <div>
+        <mat-checkbox color="primary" [(ngModel)]="settings.HTTPSProxyEnabled" (ngModelChange)="onChange()">
+          Enable HTTPS Proxy
+        </mat-checkbox>
+
+        <mat-form-field class="wide-mat-form-field">
+          <mat-label>HTTPS Proxy Hostname</mat-label>
+          <input matInput [(ngModel)]="settings.HTTPSProxyHostname" (ngModelChange)="onChange()">
+        </mat-form-field>
+
+        <mat-form-field class="wide-mat-form-field">
+          <mat-label>HTTPS Proxy Port</mat-label>
+          <input matInput type="number" [(ngModel)]="settings.HTTPSProxyPort" (ngModelChange)="onChange()">
+        </mat-form-field>
+      </div>
+
+    </div>
+  </div>
 </div>

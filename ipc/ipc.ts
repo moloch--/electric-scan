@@ -55,7 +55,10 @@ export interface IPCMessage {
 }
 
 const SCANS = {};
-const SCANS_DIR = path.join(homedir(), '.electric', 'scans');
+const APP_DIR = path.join(homedir(), '.electric');
+const SCANS_DIR = path.join(APP_DIR, 'scans');
+const SETTINGS_PATH = path.join(APP_DIR, 'settings.json');
+
 
 // IPC Methods used to start/interact with the RPCClient
 export class IPCHandlers {
@@ -66,6 +69,7 @@ export class IPCHandlers {
   }
 
   @jsonSchema({
+    "type": "object",
     "properties": {
       "url": { "type": "string", "minLength": 1, "maxLength": 2048 },
     },
@@ -87,6 +91,7 @@ export class IPCHandlers {
   }
 
   @jsonSchema({
+    "type": "object",
     "properties": {
       "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
@@ -108,6 +113,7 @@ export class IPCHandlers {
   }
 
   @jsonSchema({
+    "type": "object",
     "properties": {
       "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
       "result": { "type": "string", "minLength": 1, "maxLength": 36 },
@@ -135,6 +141,54 @@ export class IPCHandlers {
       }
     } catch(err) {
       return Promise.reject(err);
+    }
+  }
+
+  static async client_loadSettings(_: string): Promise<string> {
+    return new Promise(async (resolve) => {
+      console.log(`[load settings] ${SETTINGS_PATH}`);
+      if (!fs.existsSync(SETTINGS_PATH)) {
+        await this.client_saveSettings(JSON.stringify({}));
+      }
+      fs.readFile(SETTINGS_PATH, (err, data) => {
+        if (err) {
+          resolve(null);
+        } else {
+          try {
+            resolve(data.toString());
+          } catch (err) {
+            console.error(`[JSON Error]: ${err}`);
+            resolve(null);
+          }
+        }
+      });
+    });
+  }
+
+  @jsonSchema({
+    "type": "object",
+    "properties": {
+      "UserAgent": {"type": ["string", "null"]},
+      "DisableTLSValidation": {"type": ["boolean", "null"]},
+      "SOCKSProxyEnabled": {"type": ["boolean", "null"]},
+      "SOCKSProxyHostname": {"type": ["string", "null"]},
+      "SOCKSProxyPort": {"type": ["number", "null"]},
+      "HTTPProxyEnabled": {"type": ["boolean", "null"]},
+      "HTTPProxyHostname": {"type": ["string", "null"]},
+      "HTTPProxyPort": {"type": ["number", "null"]},
+      "HTTPSProxyEnabled": {"type": ["boolean", "null"]},
+      "HTTPSProxyHostname": {"type": ["string", "null"]},
+      "HTTPSProxyPort": {"type": ["number", "null"]},
+    }
+  })
+  static async client_saveSettings(req: string): Promise<string> {
+    try {
+      fs.writeFile(SETTINGS_PATH, req, {mode: 0o600}, (err) => {
+        err ? console.error(err) : null;
+      });
+      return req;
+    } catch(err) {
+      return Promise.reject('');
     }
   }
 
@@ -178,6 +232,7 @@ export class IPCHandlers {
   }
 
   @jsonSchema({
+    "type": "object",
     "properties": {
       "name": { "type": "string", "minLength": 1, "maxLength": 100 },
       "targets": { 
@@ -225,10 +280,11 @@ export class IPCHandlers {
   }
 
   @jsonSchema({
+    "type": "object",
     "properties": {
-      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "id": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
-    "required": ["scan"],
+    "required": ["id"],
   })
   static electric_metadata(req: string): Promise<string> {
     const metadataReq = JSON.parse(req);
