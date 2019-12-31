@@ -57,7 +57,7 @@ export class NewComponent implements OnInit {
     const timeout = Number(this.startScanForm.controls['timeout'].value) * 1000;
     const margin = Number(this.startScanForm.controls['margin'].value);
     const targets = this.parseTargets(this.startScanForm.controls['targets'].value);
-    const scan = await this._scannerService.StartScan(name, targets, workers, width, height, timeout, margin);
+    const scan = await this._scannerService.startScan(name, targets, workers, width, height, timeout, margin);
     this._router.navigate(['scan', 'view', scan['id']]);
   }
   

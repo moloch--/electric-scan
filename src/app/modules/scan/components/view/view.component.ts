@@ -91,7 +91,7 @@ export class ViewComponent implements OnInit {
   }
 
   async fetchScan() {
-    this.scan = await this._scannerService.GetScan(this.scanId);
+    this.scan = await this._scannerService.getScan(this.scanId);
   }
 
   updateDisplayResults() {

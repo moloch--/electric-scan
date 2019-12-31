@@ -18,7 +18,7 @@ export class HistoryComponent implements OnInit {
   noScans = false;
   dataSrc: MatTableDataSource<Scan>;
   displayedColumns: string[] = [
-    'started', 'name', 'results'
+    'started', 'name', 'results', 'actions'
   ];
 
   constructor(private _router: Router,
@@ -29,8 +29,8 @@ export class HistoryComponent implements OnInit {
   }
 
   async fetch() {
-    const scans = await this._scannerService.ListScans();
-    if (scans) {
+    const scans = await this._scannerService.listScans();
+    if (scans && scans.length) {
       scans.sort((a, b) => (a.started > b.started) ? 1 : -1)
       this.dataSrc = new MatTableDataSource(scans);
     } else {
@@ -46,8 +46,13 @@ export class HistoryComponent implements OnInit {
     this.dataSrc.filter = filterValue.trim().toLowerCase();
   }
 
-  onRowSelection(row: any) {
-    this._router.navigate(['scan', 'view', row.id]);
+  onRowSelection(scan: Scan) {
+    this._router.navigate(['scan', 'view', scan.id]);
+  }
+
+  async deleteScan(scan: Scan) {
+    await this._scannerService.rmScan(scan.id);
+    this.fetch();
   }
 
   sortData(event: Sort) {

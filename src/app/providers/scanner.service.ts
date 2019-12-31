@@ -51,7 +51,7 @@ export class ScannerService {
     });
   }
 
-  async StartScan(name: string, targets: string[], workers: number, width: number, height: number, timeout: number, margin: number): Promise<Object> {
+  async startScan(name: string, targets: string[], workers: number, width: number, height: number, timeout: number, margin: number): Promise<Object> {
     const resp = await this._ipc.request(`electric_scan`, JSON.stringify({
       name: name,
       width: width,
@@ -69,7 +69,7 @@ export class ScannerService {
     }
   }
 
-  async GetScan(scanId: string): Promise<Scan> {
+  async getScan(scanId: string): Promise<Scan> {
     const resp = await this._ipc.request('electric_metadata', JSON.stringify({
       id: scanId,
     }));
@@ -81,10 +81,22 @@ export class ScannerService {
     }
   }
 
-  async ListScans(): Promise<Scan[]> {
+  async listScans(): Promise<Scan[]> {
     const resp = await this._ipc.request('electric_list', '');
     try {
       return JSON.parse(resp).scans;
+    } catch (err) {
+      console.error('Error parsing ListScans response');
+      console.error(err);
+    }
+  }
+
+  async rmScan(scanId: string) {
+    const resp = await this._ipc.request('electric_rmScan', JSON.stringify({
+      scan: scanId,
+    }));
+    try {
+      return JSON.parse(resp).scan;
     } catch (err) {
       console.error('Error parsing ListScans response');
       console.error(err);

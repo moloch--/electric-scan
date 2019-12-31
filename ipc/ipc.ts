@@ -29,7 +29,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { jsonSchema } from './jsonschema';
-import { ElectricScanner, ScannerSettings } from '../scanner';
+import { ElectricScanner } from '../scanner';
 
 
 export interface ReadFileReq {
@@ -79,7 +79,7 @@ export class IPCHandlers {
     try {
       const openUrlReq = JSON.parse(req);
       const url = new URL(openUrlReq.url);
-      if (["http:", "https:"].some(p => p === url.protocol)) {
+      if (["http:", "https:"].some(proto => proto === url.protocol)) {
         console.log(`[open url] ${url.toString()}`);
         shell.openExternal(url.toString());
       }
@@ -283,6 +283,42 @@ export class IPCHandlers {
         resolve(JSON.stringify({ scans: results }));
       });
     });
+  }
+
+  @jsonSchema({
+    "type": "object",
+    "properties": {
+      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+    },
+    "required": ["scan"]
+  })
+  static async electric_rmScan(req: string): Promise<string> {
+    return new Promise(async (resolve, reject) => {
+      const rmScanReq = JSON.parse(req);
+      const scanId = path.basename(rmScanReq.scan);
+      const scanDir = path.join(SCANS_DIR, scanId);
+      if (fs.existsSync(scanDir)) {
+        console.log(`[rm scan] ${scanDir}`);
+
+        // If we fail to remove a file the rmdir() will also fail,
+        // so just always resolve the unlink() promise
+        const ls = await IPCHandlers.lsDir(scanDir);
+        await Promise.all(ls.map((filename) => {
+          return new Promise((resolve) => {
+            fs.unlink(path.join(scanDir, filename), resolve);
+          });
+        }));
+
+        fs.rmdir(scanDir, (err) => { 
+          if (err) {
+            console.error(err);
+            reject(err);
+          } else {
+            resolve(JSON.stringify({ scan: scanId }));
+          }
+        });
+      }
+    })
   }
 
   @jsonSchema({
