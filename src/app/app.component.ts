@@ -18,9 +18,11 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { Subject } from 'rxjs';
 import { SettingsService } from './providers/settings.service';
 
+const THEME_DARKNESS_SUFFIX = `-dark`
 
 @Component({
   selector: 'app-root',
@@ -29,17 +31,41 @@ import { SettingsService } from './providers/settings.service';
 })
 export class AppComponent implements OnInit {
 
-  isDarkTheme = new Subject<boolean>();
+  isThemeDark = false;
+  activeTheme: string;
+  activeThemeCssClass: string;
 
-  constructor(private _settingService: SettingsService) { }
+  constructor(private _overlayContainer: OverlayContainer,
+              private _settingService: SettingsService) { }
 
   ngOnInit() {
-    this.darkMode();
+    this.themeInit();
   }
 
-  async darkMode(): Promise<void> {
+  async themeInit(): Promise<void> {
     const preferences = await this._settingService.loadSystemPreferences();
-    this.isDarkTheme.next(preferences.darkMode);
+    this.setActiveTheme('deeppurple-amber', preferences.darkMode);
+  }
+
+  setActiveTheme(theme: string, darkness: boolean = null) {
+    if (darkness === null)
+      darkness = this.isThemeDark
+    else if (this.isThemeDark === darkness) {
+      if (this.activeTheme === theme) return
+    } else
+      this.isThemeDark = darkness
+    
+    this.activeTheme = theme
+    
+    const cssClass = darkness === true ? theme + THEME_DARKNESS_SUFFIX : theme
+    
+    const classList = this._overlayContainer.getContainerElement().classList
+    if (classList.contains(this.activeThemeCssClass))
+      classList.replace(this.activeThemeCssClass, cssClass)
+    else
+      classList.add(cssClass)
+    
+    this.activeThemeCssClass = cssClass
   }
 
 }
