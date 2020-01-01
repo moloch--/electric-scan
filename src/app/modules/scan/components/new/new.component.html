@@ -60,7 +60,7 @@
       <button class="start-scan-button" [disabled]="!startScanForm.valid || starting" mat-raised-button (click)="startScan()">
         <div *ngIf="!starting">
           <i class="fas fa-fw fa-crosshairs"></i>
-          Start Scan
+          Scan {{ numberOfTargets }} Target(s)
         </div>
         <div *ngIf="starting">
           <i class="fa fa-spin fa-spinner"></i>
