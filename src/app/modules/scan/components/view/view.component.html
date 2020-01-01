@@ -35,7 +35,7 @@
 
     <div *ngFor="let result of displayedResults; let index = index" [attr.data-index]="index">
 
-      <mat-card class="result-card" [@fadeInOut] (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
+      <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
         <mat-card-header>
           <mat-card-title>
             <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before" matBadgeColor="primary">

@@ -43,7 +43,6 @@ export class ViewComponent implements OnInit {
       this._scanSub = this._scannerService.scans$.subscribe((scan) => {
         if (scan.id === this.scanId) {
           this.scan = scan;
-         
         }
       });
     });
@@ -102,7 +101,10 @@ export class ViewComponent implements OnInit {
     if (this.hideErrors) {
       completed = completed.filter(r => r.error === '');
     }
-    this.displayedResults = completed.slice(0, this.page * this.pageSize);
+    completed = completed.slice(0, this.page * this.pageSize);
+    if (JSON.stringify(this.displayedResults) !== JSON.stringify(completed)) {
+      this.displayedResults = completed;
+    }
   }
 
   details(result: ScanResult) {
