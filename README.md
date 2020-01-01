@@ -7,6 +7,7 @@ It's Electric (Electron)-based screenshot tool, similar to EyeWitness/GoWitness.
 * 3x faster than EyeWitness
 * SOCKS/HTTP/HTTPS Proxy Support
 * Cross-platform GUI
+* A [reasonably secure design](https://github.com/moloch--/reasonably-secure-electron)
 
 ### Install
 
