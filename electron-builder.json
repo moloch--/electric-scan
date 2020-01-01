@@ -37,8 +37,7 @@
   "linux": {
     "icon": "dist",
     "target": [
-      "deb",
-      "rpm"
+      "deb"
     ]
   }
 }
