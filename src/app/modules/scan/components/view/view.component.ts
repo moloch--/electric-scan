@@ -102,6 +102,7 @@ export class ViewComponent implements OnInit {
       completed = completed.filter(r => r.error === '');
     }
     completed = completed.slice(0, this.page * this.pageSize);
+
     if (JSON.stringify(this.displayedResults) !== JSON.stringify(completed)) {
       this.displayedResults = completed;
     }
