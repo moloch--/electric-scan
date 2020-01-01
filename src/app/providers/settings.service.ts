@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 import { IPCService } from './ipc.service';
 
 
@@ -24,6 +25,10 @@ export interface Settings {
 
 }
 
+export interface SystemPreferences {
+  darkMode: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -42,6 +47,11 @@ export class SettingsService {
     const updated = await this._ipc.request('client_saveSettings', data);
     console.log(`[SettingsService] Load: ${updated}`);
     return JSON.parse(updated);
+  }
+
+  async loadSystemPreferences(): Promise<SystemPreferences> {
+    const data = await this._ipc.request('client_systemPreferences', '');
+    return JSON.parse(data);
   }
 
 }

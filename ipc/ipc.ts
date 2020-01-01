@@ -22,7 +22,9 @@ listing/selecting configs to the sandboxed code.
 
 */
 
-import { ipcMain, FileFilter, BrowserWindow, IpcMainEvent, dialog } from 'electron';
+import {
+  ipcMain, FileFilter, BrowserWindow, IpcMainEvent, dialog, nativeTheme
+} from 'electron';
 import { homedir } from 'os';
 import { shell } from 'electron';
 import * as fs from 'fs';
@@ -66,6 +68,12 @@ export class IPCHandlers {
   static client_exit() {
     process.on('unhandledRejection', () => { }); // STFU Node
     process.exit(0);
+  }
+
+  static async client_systemPreferences(_: string): Promise<string> {
+    return JSON.stringify({
+      darkMode: nativeTheme.shouldUseDarkColors,
+    });
   }
 
   @jsonSchema({
@@ -298,10 +306,10 @@ export class IPCHandlers {
       const scanId = path.basename(rmScanReq.scan);
       const scanDir = path.join(SCANS_DIR, scanId);
       if (fs.existsSync(scanDir)) {
-        console.log(`[rm scan] ${scanDir}`);
 
         // If we fail to remove a file the rmdir() will also fail,
         // so just always resolve the unlink() promise
+        console.log(`[rm scan] ${scanDir}`);
         const ls = await IPCHandlers.lsDir(scanDir);
         await Promise.all(ls.map((filename) => {
           return new Promise((resolve) => {

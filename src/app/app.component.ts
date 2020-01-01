@@ -17,16 +17,29 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import { Component } from '@angular/core';
-import { AppConfig } from '../environments/environment';
+import { Component, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { SettingsService } from './providers/settings.service';
+
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-  
-  constructor() { }
+export class AppComponent implements OnInit {
+
+  isDarkTheme = new Subject<boolean>();
+
+  constructor(private _settingService: SettingsService) { }
+
+  ngOnInit() {
+    this.darkMode();
+  }
+
+  async darkMode(): Promise<void> {
+    const preferences = await this._settingService.loadSystemPreferences();
+    this.isDarkTheme.next(preferences.darkMode);
+  }
 
 }

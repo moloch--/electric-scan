@@ -18,7 +18,6 @@
 */
 
 import { app, BrowserWindow, screen, protocol } from 'electron';
-import { nativeTheme } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -82,8 +81,6 @@ async function createMainWindow() {
 // ----------------------------------------- [ MAIN ] -----------------------------------------
 
 try {
-
-  console.log(`dark mode: ${nativeTheme.shouldUseDarkColors}`);
 
   if (!fs.existsSync(SCANS_DIR)) {
     fs.mkdirSync(SCANS_DIR, {recursive: true, mode: 0o700});
