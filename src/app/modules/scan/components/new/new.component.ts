@@ -104,7 +104,7 @@ export class NewComponent implements OnInit {
         const mask = Number(targetCidr.split('/')[1]);
         if (mask && this.MIN_MASK < mask) {
           let ips: string[] = cidr.toArray();
-          ips = ips.map(ip => { 
+          ips = ips.map((ip) => { 
             targetUri.hostname = ip;
             return targetUri.toString();
           });
@@ -127,8 +127,15 @@ export class NewComponent implements OnInit {
       }
       allTargets[index] = `http://${allTargets[index]}`;
     }
+    allTargets = this.unique(allTargets);
     console.log(allTargets);
     return allTargets;
+  }
+
+  unique(targets: string[]): string[] {
+    return targets.filter((elem, index, self) => {
+      return index === self.indexOf(elem);
+    });
   }
 
 }

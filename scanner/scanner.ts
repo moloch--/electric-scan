@@ -249,6 +249,7 @@ export class ElectricScanner {
         safeDialogs: true,
       }
     });
+    window.webContents.setAudioMuted(true);
     window.webContents.session.on('will-download', (event) => {
       event.preventDefault();
     });
