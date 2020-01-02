@@ -156,7 +156,7 @@ export class ElectricScanner {
       };
 
       const getNextTask = () => {
-        console.log(`getNextTask() - Task ${taskIndex} of ${tasks.length} - Workers: ${numOfWorkers} (Max: ${this.maxNumOfWorkers})`);
+        console.log(`Task ${taskIndex} of ${tasks.length} - Workers: ${numOfWorkers} (Max: ${this.maxNumOfWorkers})`);
         if (numOfWorkers < this.maxNumOfWorkers && taskIndex < tasks.length) {
           const index = taskIndex;
           this.capture(tasks[index]).then((result) => { 
@@ -178,7 +178,7 @@ export class ElectricScanner {
 
   private async capture(target: string): Promise<Screenshot> {
     const targetURL = new URL(target);
-    console.log(`Screenshot: ${targetURL.toString()}`);
+    // console.log(`Screenshot: ${targetURL.toString()}`);
     if (targetURL.protocol !== 'http:' && targetURL.protocol !== 'https:') {
       return Promise.reject({
         target: targetURL.toString(),
@@ -214,7 +214,7 @@ export class ElectricScanner {
   private screenshot(scanWindow: BrowserWindow, targetURL: URL): Promise<NativeImage> {
     return new Promise(async (resolve, reject) => {
       const timeoutErr = setTimeout(() => {
-        reject({ code: 'ERR_TIMEOUT' });
+        reject({ code: 'ERR_REQUEST_TIMEOUT' });
       }, this.timeout);
       try {
         await scanWindow.loadURL(targetURL.toString());
