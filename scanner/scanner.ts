@@ -214,15 +214,19 @@ export class ElectricScanner {
   private screenshot(scanWindow: BrowserWindow, targetURL: URL): Promise<NativeImage> {
     return new Promise(async (resolve, reject) => {
       const timeoutErr = setTimeout(() => {
-        reject({code: 'Request timeout'});
+        reject({ code: 'ERR_TIMEOUT' });
       }, this.timeout);
       try {
         await scanWindow.loadURL(targetURL.toString());
         console.log(`did-finish-load: ${targetURL.toString()}`);
         clearTimeout(timeoutErr);
         setTimeout(async () => {
-          const image = await scanWindow.capturePage();
-          resolve(image);
+          try {
+            const image = await scanWindow.capturePage();
+            resolve(image);
+          } catch(err) {
+            reject(err);
+          }
         }, this.margin);
       } catch (err) {
         reject(err);
@@ -296,7 +300,9 @@ export class ElectricScanner {
       proxyRules.push(httpsProxy);
     }
     const rules = proxyRules.join(';');
-    console.log(`[proxy rules] ${rules}`);
+    if (proxyRules.length) {
+      console.log(`[proxy rules] ${rules}`);
+    }
     return rules;
   }
 

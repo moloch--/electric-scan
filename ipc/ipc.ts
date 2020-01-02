@@ -56,7 +56,6 @@ export interface IPCMessage {
   data: string;
 }
 
-const SCANS = {};
 export const APP_DIR = path.join(homedir(), '.electric');
 export const SCANS_DIR = path.join(APP_DIR, 'scans');
 export const SETTINGS_PATH = path.join(APP_DIR, 'settings.json');
@@ -366,13 +365,11 @@ export class IPCHandlers {
     }
     const parentDir = path.join(homedir(), '.electric', 'scans');
     const scan$ = await scanner.start(parentDir, scanReq.name, scanReq.targets);
-    SCANS[scanner.scan.id] = scan$;
     const subscription = scan$.subscribe((scan) => {
       ipcMain.emit('push', JSON.stringify(scan));
     }, (err) => {
       console.error(`[scan error]: ${err}`);
     }, () => {
-      delete SCANS[scanner.scan.id];
       subscription.unsubscribe();
     });
     return JSON.stringify({ id: scanner.scan.id });
