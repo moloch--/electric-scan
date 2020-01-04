@@ -122,7 +122,7 @@ export class ElectricScanner {
     return new Promise((resolve, reject) => {
       const metaPath = path.join(this._scanDir, 'metadata.json');
       const data = JSON.stringify(this.scan);
-      writeFileAtomic(metaPath, data, {mode: 0o600}, (err) => {
+      writeFileAtomic(metaPath, data, {mode: 0o600}, (err: any) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);
       });
@@ -207,6 +207,7 @@ export class ElectricScanner {
       };
     } finally {
       scanWindow.close();
+      scanWindow = null;
     }
     return result;
   }
