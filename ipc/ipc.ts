@@ -345,7 +345,7 @@ export class IPCHandlers {
     const scanReq = JSON.parse(req);
     const workers = scanReq.maxWorkers ? Math.abs(scanReq.maxWorkers || 1) : 8;
     const scanSettings = await IPCHandlers.client_loadSettings('');
-    const scanner = new ElectricScanner(JSON.parse(scanSettings), workers);
+    let scanner = new ElectricScanner(JSON.parse(scanSettings), workers);
     if (scanReq.width) {
       scanner.width = scanReq.width;
     }
@@ -358,14 +358,15 @@ export class IPCHandlers {
     if (scanReq.timeout) {
       scanner.timeout = scanReq.timeout;
     }
-    const parentDir = path.join(homedir(), '.electric', 'scans');
-    const scan$ = await scanner.start(parentDir, scanReq.name, scanReq.targets);
+    const scan$ = await scanner.start(SCANS_DIR, scanReq.name, scanReq.targets);
     const subscription = scan$.subscribe((scan) => {
       ipcMain.emit('push', JSON.stringify(scan));
     }, (err) => {
       console.error(`[scan error]: ${err}`);
     }, () => {
+      // On Complete
       subscription.unsubscribe();
+      scanner = null;
     });
     return JSON.stringify({ id: scanner.scan.id });
   }

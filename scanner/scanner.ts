@@ -207,7 +207,6 @@ export class ElectricScanner {
       };
     } finally {
       scanWindow.close();
-      scanWindow = null;
     }
     return result;
   }
