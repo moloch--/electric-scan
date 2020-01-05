@@ -89,16 +89,19 @@ try {
   app.on('ready', async () => {
     protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler);
     protocol.registerBufferProtocol(ScanProtocol.scheme, ScanProtocol.requestHandler);
+    protocol.interceptFileProtocol('file', (_, cb) => { cb(null) });
     createMainWindow();
     startIPCHandlers(mainWindow);
   });
 
   protocol.registerSchemesAsPrivileged([{
     scheme: AppProtocol.scheme,
-    privileges: { standard: true, secure: true }
-  }]);
-
-  protocol.registerSchemesAsPrivileged([{
+    privileges: { 
+      standard: true,
+      secure: true,
+      corsEnabled: false,
+    }
+  }, {
     scheme: ScanProtocol.scheme,
     privileges: { standard: true, secure: true }
   }]);

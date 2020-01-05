@@ -358,7 +358,7 @@ export class IPCHandlers {
     if (scanReq.timeout) {
       scanner.timeout = scanReq.timeout;
     }
-    const scan$ = await scanner.start(SCANS_DIR, scanReq.name, scanReq.targets);
+    let scan$ = await scanner.start(SCANS_DIR, scanReq.name, scanReq.targets);
     const subscription = scan$.subscribe((scan) => {
       ipcMain.emit('push', JSON.stringify(scan));
     }, (err) => {
@@ -367,6 +367,7 @@ export class IPCHandlers {
       // On Complete
       subscription.unsubscribe();
       scanner = null;
+      scan$ = null;
     });
     return JSON.stringify({ id: scanner.scan.id });
   }
