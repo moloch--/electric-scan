@@ -65,14 +65,14 @@ export class ClientHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
-    "required": ["scan"]
+    "required": ["scanId"]
   })
   static async client_openScanFolder(req: string): Promise<string> {
     try {
       const openScanReq = JSON.parse(req);
-      const scanId = path.basename(openScanReq.scan);
+      const scanId = path.basename(openScanReq.scanId);
       const scanPath = path.join(SCANS_DIR, scanId);
       if (fs.existsSync(scanPath)) {
         shell.showItemInFolder(scanPath);
@@ -87,16 +87,16 @@ export class ClientHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
-      "result": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "resultId": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
-    "required": ["scan", "result"]
+    "required": ["scanId", "resultId"]
   })
   static async client_saveImageAs(req: string): Promise<string> {
     try {
       const saveImageReq = JSON.parse(req);
-      const scanId = path.basename(saveImageReq.scan);
-      const resultId = path.basename(saveImageReq.result);
+      const scanId = path.basename(saveImageReq.scanId);
+      const resultId = path.basename(saveImageReq.resultId);
       const src = path.join(SCANS_DIR, scanId, `${resultId}.png`);
       if (fs.existsSync(src)) {
         const dialogOptions = {
@@ -123,14 +123,14 @@ export class ClientHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
-    "required": ["scan"]
+    "required": ["scanId"]
   })
   static async client_saveAllAs(req: string): Promise<string> {
     try {
       const saveAllReq = JSON.parse(req);
-      const scanId = path.basename(saveAllReq.scan);
+      const scanId = path.basename(saveAllReq.scanId);
       const srcDir = path.join(SCANS_DIR, scanId);
       if (fs.existsSync(srcDir)) {
         const dialogOptions = {

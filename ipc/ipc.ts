@@ -17,9 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import {
-  ipcMain, BrowserWindow, IpcMainEvent, dialog, nativeTheme
-} from 'electron';
+import { ipcMain, BrowserWindow, IpcMainEvent } from 'electron';
 
 import { ElectricHandlers } from './electric-handlers';
 import { ClientHandlers } from './client-handlers';

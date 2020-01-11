@@ -18,11 +18,11 @@
 */
 
 import { BrowserWindow, NativeImage, Session } from 'electron';
+import { BehaviorSubject } from 'rxjs';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as writeFileAtomic from 'write-file-atomic';
-import { BehaviorSubject } from 'rxjs';
 
 
 // Screenshot data + metadata

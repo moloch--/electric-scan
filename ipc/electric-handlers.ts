@@ -74,7 +74,7 @@ export class ElectricHandlers {
     "properties": {
       "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
-    "required": ["scan"]
+    "required": ["scanId"]
   })
   static async electric_rmScan(req: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
@@ -157,18 +157,18 @@ export class ElectricHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "id": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
     },
-    "required": ["id"],
+    "required": ["scanId"],
   })
   static electric_metadata(req: string): Promise<string> {
-    const metadataReq = JSON.parse(req);
+    const metaReq = JSON.parse(req);
     return new Promise(async (resolve, reject) => {
-      const meta = await ElectricHandlers.readMetadata(path.join(SCANS_DIR, metadataReq.id));
+      const meta = await ElectricHandlers.readMetadata(path.join(SCANS_DIR, metaReq.scanId));
       if (meta) {
         resolve(JSON.stringify(meta));
        } else {
-        reject(`Scan '${metadataReq.id}' does not exist`);
+        reject(`Scan '${metaReq.scanId}' does not exist`);
        }
     });
   }
