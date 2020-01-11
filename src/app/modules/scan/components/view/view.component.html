@@ -46,7 +46,7 @@
             {{ result.target }}
           </mat-card-subtitle>
         </mat-card-header>
-        <img *ngIf="result.error === ''" mat-card-image [src]="result.id | scanUrl: this.scan.id">
+        <img *ngIf="result.error === ''" mat-card-image [attr.src]="(result.id | dataUrl: this.scan.id) | async">
         <p *ngIf="result.error">
           {{ result.error }}
         </p>

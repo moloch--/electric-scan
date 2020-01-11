@@ -23,7 +23,6 @@ import * as fs from 'fs';
 
 import { startIPCHandlers, SCANS_DIR } from './ipc';
 import * as AppProtocol from './app-protocol';
-import * as ScanProtocol from './scan-protocol';
 
 
 let mainWindow: BrowserWindow;
@@ -81,7 +80,6 @@ try {
   // Custom protocol handler
   app.on('ready', () => {
     protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler);
-    protocol.registerBufferProtocol(ScanProtocol.scheme, ScanProtocol.requestHandler);
     protocol.interceptFileProtocol('file', (_, cb) => { cb(null) });
     createMainWindow();
     startIPCHandlers(mainWindow);
@@ -89,9 +87,6 @@ try {
 
   protocol.registerSchemesAsPrivileged([{
     scheme: AppProtocol.scheme,
-    privileges: { standard: true, secure: true }
-  }, {
-    scheme: ScanProtocol.scheme,
     privileges: { standard: true, secure: true }
   }]);
 

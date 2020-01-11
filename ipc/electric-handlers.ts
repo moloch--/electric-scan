@@ -173,4 +173,28 @@ export class ElectricHandlers {
     });
   }
 
+  @jsonSchema({
+    "type": "object",
+    "properties": {
+      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "resultId": { "type": "string", "minLength": 1, "maxLength": 36 },
+    },
+    "required": ["scanId", "resultId"]
+  })
+  static electric_getDataUrl(req: string): Promise<string> {
+    try {
+      const dataUrlReq = JSON.parse(req);
+      const scanId = path.basename(dataUrlReq.scanId);
+      const resultId = path.basename(dataUrlReq.resultId);
+      return new Promise((resolve, reject) => {
+        const dataPath = path.join(SCANS_DIR, scanId, `${resultId}.data`);
+        fs.readFile(dataPath, {encoding: 'utf8'}, (err, data) => {
+          err ? reject(err) : resolve(JSON.stringify({ dataUrl: data }));
+        });
+      });
+    } catch(err) {
+      return Promise.reject(err);
+    }
+  }
+
 }

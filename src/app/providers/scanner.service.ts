@@ -27,6 +27,7 @@ export interface ScanResult {
   id: string;
   target: string;
   error: string;
+  dataUrl: string;
 }
 
 export interface Scan {
@@ -37,11 +38,41 @@ export interface Scan {
   duration: number;
 }
 
+// LRU Cache to Hold Image DataUrls
+class LRUCache<T> {
+
+  private _cache: Map<string, T> = new Map<string, T>();
+  private _maxEntries: number = 100;
+
+  get(key: string): T|null {
+    const hasKey = this._cache.has(key);
+    if (hasKey) {
+      const entry = this._cache.get(key);
+      this._cache.delete(key);
+      this._cache.set(key, entry);
+      return entry;
+    } else {
+      return null;
+    }
+  }
+
+  put(key: string, value: T) {
+    if (this._cache.size >= this._maxEntries) {
+      const keyToDelete = this._cache.keys().next().value;
+      this._cache.delete(keyToDelete);
+    }
+    this._cache.set(key, value);
+  }
+
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScannerService {
+
+  private _imageCache = new LRUCache<string>();
 
   scans$ = new Subject<Scan>();
 
@@ -77,6 +108,27 @@ export class ScannerService {
       return JSON.parse(resp);
     } catch (err) {
       console.error(`Error parsing GetScan response: ${resp}`);
+      console.error(err);
+    }
+  }
+
+  async getDataUrl(scanId: string, resultId: string): Promise<string> {
+    let dataUrl = this._imageCache.get(resultId);
+    if (dataUrl !== null) {
+      console.log(`cache hit: ${resultId}`);
+      return dataUrl;
+    }
+    console.log(`cache miss: ${resultId}`);
+    const resp = await this._ipc.request('electric_getDataUrl', JSON.stringify({
+      scanId: scanId,
+      resultId: resultId,
+    }));
+    try {
+      dataUrl = JSON.parse(resp).dataUrl;
+      this._imageCache.put(resultId, dataUrl);
+      return dataUrl;
+    } catch (err) {
+      console.error(`Error parsing getDataUrl response: ${resp}`);
       console.error(err);
     }
   }

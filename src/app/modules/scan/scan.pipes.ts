@@ -1,17 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { ScannerService } from '@app/providers/scanner.service';
 
 @Pipe({
-  name: 'scanUrl'
+  name: 'dataUrl'
 })
-export class ScanUrlPipe implements PipeTransform {
+export class DataUrlPipe implements PipeTransform {
 
-  constructor(private domSanitizer: DomSanitizer) { }
+  constructor(private _scannerService: ScannerService) { }
 
-  transform(resultId: string, scanId: string) {
-    const url = new URL(`scan://electric`);
-    url.pathname = `${scanId}/${resultId}.png`;
-    return this.domSanitizer.bypassSecurityTrustResourceUrl(url.toString());
+  async transform(resultId: string, scanId: string) {
+    const dataUrl = await this._scannerService.getDataUrl(scanId, resultId);
+    return dataUrl;
   }
 
 }

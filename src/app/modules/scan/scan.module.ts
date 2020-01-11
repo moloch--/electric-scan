@@ -10,7 +10,7 @@ import { HistoryComponent } from './components/history/history.component';
 import { 
   ViewComponent, DetailsDialogComponent, OpenUrlDialogComponent
 } from './components/view/view.component';
-import { ScanUrlPipe, UrlTitlePipe, DatePipe } from './scan.pipes';
+import { UrlTitlePipe, DatePipe, DataUrlPipe } from './scan.pipes';
 import { EyeballComponent } from './components/eyeball/eyeball.component';
 
 
@@ -22,9 +22,9 @@ import { EyeballComponent } from './components/eyeball/eyeball.component';
     DetailsDialogComponent,
     OpenUrlDialogComponent,
 
-    ScanUrlPipe,
     UrlTitlePipe,
     DatePipe,
+    DataUrlPipe,
     EyeballComponent,
   ],
   imports: [

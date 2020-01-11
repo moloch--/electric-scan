@@ -9,6 +9,8 @@ import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service
 import { ClientService } from '@app/providers/client.service';
 
 
+
+
 @Component({
   selector: 'app-view',
   templateUrl: './view.component.html',
@@ -99,10 +101,9 @@ export class ViewComponent implements OnInit {
     }
     let completed = this.scan.results.filter(r => r !== null);
     if (this.hideErrors) {
-      completed = completed.filter(r => r.error === '');
+      completed = completed.filter(res => res.error === '');
     }
     completed = completed.slice(0, this.page * this.pageSize);
-
     if (JSON.stringify(this.displayedResults) !== JSON.stringify(completed)) {
       this.displayedResults = completed;
     }

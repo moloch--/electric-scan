@@ -37,7 +37,6 @@ export interface ScanResult {
   id: string;
   target: string;
   error: string;
-  dataUrl: string;
 }
 
 // Results for the entire scan
@@ -138,19 +137,24 @@ export class ElectricScanner {
 
       const handleResult = async (index: number, screenshot: Screenshot) => {
         console.log(`handleResult() for ${index}`);
-        const taskId = uuid().toString();
+        const resultId = uuid().toString();
         if (screenshot.image) {
-          const filePNG = path.join(this._scanDir, `${taskId}.png`);
+          const filePNG = path.join(this._scanDir, `${resultId}.png`);
           const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
           fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err: NodeJS.ErrnoException) => {
             err ? console.error(err) : null;
           });
+
+          const fileData = path.join(this._scanDir, `${resultId}.data`);
+          const dataUrl = screenshot.image ? screenshot.image.toDataURL() : '';
+          fs.writeFile(fileData, dataUrl, {mode: 0o600, encoding: 'utf8'}, (err: NodeJS.ErrnoException) => {
+            err ? console.error(err) : null;
+          });
         }
         this.scan.results[index] = {
-          id: taskId,
+          id: resultId,
           target: screenshot.target,
           error: screenshot.error,
-          dataUrl: screenshot.image ? screenshot.image.toDataURL() : '',
         };
         await this.saveMetadata();
         numOfWorkers--;
