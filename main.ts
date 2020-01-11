@@ -31,7 +31,7 @@ let mainWindow: BrowserWindow;
 async function createMainWindow() {
 
   const electronScreen = screen;
-  const size = electronScreen.getPrimaryDisplay().workAreaSize;
+  const screenSize = electronScreen.getPrimaryDisplay().workAreaSize;
 
   // Create the browser window.
   const gutterSize = 100;
@@ -39,12 +39,9 @@ async function createMainWindow() {
     titleBarStyle: 'hidden',
     x: gutterSize,
     y: gutterSize,
-    width: size.width - (gutterSize * 2),
-    height: size.height - (gutterSize * 2),
+    width: screenSize.width - (gutterSize * 2),
+    height: screenSize.height - (gutterSize * 2),
     webPreferences: {
-      scrollBounce: true,
-      // I think I got all of the settings we want here to reasonably lock down
-      // the BrowserWindow - https://electronjs.org/docs/api/browser-window
       sandbox: true,
       webSecurity: true,
       contextIsolation: true,
@@ -67,17 +64,13 @@ async function createMainWindow() {
 
   mainWindow.loadURL(`${AppProtocol.scheme}://electric/index.html`);
 
-  // Emitted when the window is closed.
   mainWindow.on('closed', () => {
-    // Dereference the window object, usually you would store window
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     mainWindow = null;
   });
 
 }
 
-// ----------------------------------------- [ MAIN ] -----------------------------------------
+// ------------------- [ MAIN ] -------------------
 
 try {
 
@@ -86,7 +79,7 @@ try {
   }
 
   // Custom protocol handler
-  app.on('ready', async () => {
+  app.on('ready', () => {
     protocol.registerBufferProtocol(AppProtocol.scheme, AppProtocol.requestHandler);
     protocol.registerBufferProtocol(ScanProtocol.scheme, ScanProtocol.requestHandler);
     protocol.interceptFileProtocol('file', (_, cb) => { cb(null) });
@@ -96,20 +89,13 @@ try {
 
   protocol.registerSchemesAsPrivileged([{
     scheme: AppProtocol.scheme,
-    privileges: { 
-      standard: true,
-      secure: true,
-      corsEnabled: false,
-    }
+    privileges: { standard: true, secure: true }
   }, {
     scheme: ScanProtocol.scheme,
     privileges: { standard: true, secure: true }
   }]);
 
-  // Quit when all windows are closed.
   app.on('window-all-closed', () => {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
       app.quit();
     }
@@ -122,6 +108,6 @@ try {
   });
 
 } catch (error) {
-  console.log(error);
+  console.error(error);
   process.exit(1);
 }

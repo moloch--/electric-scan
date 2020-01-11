@@ -24,6 +24,7 @@ export class NewComponent implements OnInit {
   numberOfTargets = 0;
   startScanForm: FormGroup;
   starting = false;
+  countingTargets = false;
 
   constructor(private _fb: FormBuilder,
               private _router: Router,
@@ -56,11 +57,12 @@ export class NewComponent implements OnInit {
       ])],
     });
 
-    const debounceTargets = this.startScanForm.get('targets').valueChanges.pipe(
-      debounce(() => interval(500))
-    );
-    debounceTargets.subscribe((val) => {
-      this.numberOfTargets = this.parseTargets(val).length;
+    this.startScanForm.get('targets').valueChanges.pipe(
+      debounce(() => interval(300))
+    ).subscribe((rawTargets: string) => {
+      this.countingTargets = true;
+      this.numberOfTargets = this.parseTargets(rawTargets).length;
+      this.countingTargets = false;
     });
   }
 
@@ -93,7 +95,7 @@ export class NewComponent implements OnInit {
       } else {
         targetUri = new URL(`http://${target}`);
       }
-      let targetCidr = `${targetUri.hostname}${targetUri.pathname}`
+      let targetCidr = `${targetUri.hostname}${targetUri.pathname}`;
       console.log(`check cidr: ${targetCidr} from '${targetUri}' (${target})`);
       const cidr = new IPCIDR(targetCidr);
       if (cidr.isValid()) {
@@ -128,7 +130,7 @@ export class NewComponent implements OnInit {
       allTargets[index] = `http://${allTargets[index]}`;
     }
     allTargets = this.unique(allTargets);
-    console.log(allTargets);
+    // console.log(allTargets);
     return allTargets;
   }
 

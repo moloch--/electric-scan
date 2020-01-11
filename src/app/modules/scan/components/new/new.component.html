@@ -57,14 +57,13 @@
 
   <div class="footer-form-container">
     <div class="inner-footer-form-container">
-      <button class="start-scan-button" [disabled]="!startScanForm.valid || starting" mat-raised-button (click)="startScan()">
-        <div *ngIf="!starting">
+      <button class="start-scan-button" [disabled]="!startScanForm.valid || starting || countingTargets" mat-raised-button (click)="startScan()">
+        <div *ngIf="!starting && !countingTargets">
           <i class="fas fa-fw fa-crosshairs"></i>
           Scan {{ numberOfTargets }} Target(s)
         </div>
-        <div *ngIf="starting">
+        <div *ngIf="starting || countingTargets">
           <i class="fa fa-spin fa-spinner"></i>
-          Starting ...
         </div>
       </button>
       <br />

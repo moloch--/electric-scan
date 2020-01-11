@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import { BrowserWindow, NativeImage, Session, Config } from 'electron';
+import { BrowserWindow, NativeImage, Session } from 'electron';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -118,11 +118,11 @@ export class ElectricScanner {
     return this.scan$;
   }
 
-  private async saveMetadata() {
+  private async saveMetadata(): Promise<void|NodeJS.ErrnoException> {
     return new Promise((resolve, reject) => {
       const metaPath = path.join(this._scanDir, 'metadata.json');
       const data = JSON.stringify(this.scan);
-      writeFileAtomic(metaPath, data, {mode: 0o600}, (err: any) => {
+      writeFileAtomic(metaPath, data, {mode: 0o600}, (err: NodeJS.ErrnoException) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);
       });
@@ -141,7 +141,7 @@ export class ElectricScanner {
         if (screenshot.image) {
           const filePNG = path.join(this._scanDir, `${taskId}.png`);
           const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
-          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err) => {
+          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err: NodeJS.ErrnoException) => {
             err ? console.error(err) : null;
           });
         }
