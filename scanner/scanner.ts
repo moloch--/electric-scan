@@ -37,6 +37,7 @@ export interface ScanResult {
   id: string;
   target: string;
   error: string;
+  dataUrl: string;
 }
 
 // Results for the entire scan
@@ -149,6 +150,7 @@ export class ElectricScanner {
           id: taskId,
           target: screenshot.target,
           error: screenshot.error,
+          dataUrl: screenshot.image ? screenshot.image.toDataURL() : '',
         };
         await this.saveMetadata();
         numOfWorkers--;

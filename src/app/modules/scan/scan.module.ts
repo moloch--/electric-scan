@@ -11,6 +11,7 @@ import {
   ViewComponent, DetailsDialogComponent, OpenUrlDialogComponent
 } from './components/view/view.component';
 import { ScanUrlPipe, UrlTitlePipe, DatePipe } from './scan.pipes';
+import { EyeballComponent } from './components/eyeball/eyeball.component';
 
 
 @NgModule({
@@ -24,6 +25,7 @@ import { ScanUrlPipe, UrlTitlePipe, DatePipe } from './scan.pipes';
     ScanUrlPipe,
     UrlTitlePipe,
     DatePipe,
+    EyeballComponent,
   ],
   imports: [
     CommonModule,
