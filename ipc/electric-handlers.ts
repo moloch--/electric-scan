@@ -173,15 +173,4 @@ export class ElectricHandlers {
     });
   }
 
-  @jsonSchema({
-    "type": "object",
-    "properties": {
-      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
-    },
-    "required": ["scanId"],
-  })
-  static async electric_eyeball(req: string): Promise<string> {
-    return '';
-  }
-
 }

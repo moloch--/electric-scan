@@ -38,20 +38,20 @@ export class ClientService {
   }
 
   async openScanFolder(scanId: string): Promise<void> {
-    this._ipc.request('client_openScanFolder', JSON.stringify({ scan: scanId }));
+    this._ipc.request('client_openScanFolder', JSON.stringify({ scanId: scanId }));
   }
 
   async saveImageAs(scanId: string, resultId: string): Promise<boolean> {
     const save = await this._ipc.request('client_saveImageAs', JSON.stringify({ 
-        scan: scanId,
-        result: resultId,
+        scanId: scanId,
+        resultId: resultId,
     }));
     return JSON.parse(save).success ? true : false; 
   }
 
   async saveAllAs(scanId: string): Promise<void> {
     this._ipc.request('client_saveAllAs', JSON.stringify({ 
-      scan: scanId,
+      scanId: scanId,
     }));
   }
 

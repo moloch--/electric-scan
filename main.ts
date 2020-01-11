@@ -22,7 +22,6 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { startIPCHandlers, SCANS_DIR } from './ipc';
-
 import * as AppProtocol from './app-protocol';
 import * as ScanProtocol from './scan-protocol';
 

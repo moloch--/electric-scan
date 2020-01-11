@@ -71,7 +71,7 @@ export class ScannerService {
 
   async getScan(scanId: string): Promise<Scan> {
     const resp = await this._ipc.request('electric_metadata', JSON.stringify({
-      id: scanId,
+      scanId: scanId,
     }));
     try {
       return JSON.parse(resp);
@@ -93,7 +93,7 @@ export class ScannerService {
 
   async rmScan(scanId: string) {
     const resp = await this._ipc.request('electric_rmScan', JSON.stringify({
-      scan: scanId,
+      scanId: scanId,
     }));
     try {
       return JSON.parse(resp).scan;
