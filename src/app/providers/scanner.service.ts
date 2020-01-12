@@ -37,6 +37,8 @@ export interface Scan {
   results: ScanResult[];
   started: number;
   duration: number;
+  width: number;
+  height: number;
 }
 
 // LRU Cache to Hold Image DataUrls

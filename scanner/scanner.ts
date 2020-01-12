@@ -46,6 +46,8 @@ export interface Scan {
   results: ScanResult[];
   started: number;
   duration: number;
+  width: number;
+  height: number;
 }
 
 export interface ScannerSettings {
@@ -97,6 +99,8 @@ export class ElectricScanner {
       results: new Array(tasks.length),
       started: this._started.getTime(),
       duration: -1,
+      width: this.width,
+      height: this.height,
     };
     console.log(`Starting new scan with id ${this.scan.id}`)
     console.log(`Max number of workers: ${this.maxNumOfWorkers}`);

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as tf from '@tensorflow/tfjs';
 
-import { ScannerService, Scan } from '@app/providers/scanner.service';
+import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
 
 
 export interface EyeballClassification {
@@ -19,8 +19,6 @@ export interface EyeballClassification {
   styleUrls: ['./eyeball.component.scss']
 })
 export class EyeballComponent implements OnInit {
-
-  readonly TF_RESOURCES: File[] = [];
 
   readonly CUSTOM_404 = 'Custom 404';
   readonly LOGIN_PAGE = 'Login Page';
@@ -46,10 +44,10 @@ export class EyeballComponent implements OnInit {
       this.scan = await this._scannerService.getScan(params['scan-id']);
       console.log(this.scan);
       await Promise.all(this.scan.results
-        .filter(res => res.error === '')
-        .map(async (res) => {
-          const img = await this._scannerService.getDataUrl(this.scan.id, res.id);
-          this.images.set(res.id, img);
+        .filter((result: ScanResult) => result.error === '')
+        .map(async (result: ScanResult) => {
+          const img = await this._scannerService.getDataUrl(this.scan.id, result.id);
+          this.images.set(result.id, img);
       }));
       this.imagesCompleted = true;
     });
@@ -66,15 +64,15 @@ export class EyeballComponent implements OnInit {
       console.log(`classifying: ${key}`);
       const img = new Image();
       img.src = this.images.get(key);
-      img.height = 1080;
-      img.width = 1920;
-      const image = tf.browser.fromPixels(img)
+      img.height = this.scan.height;
+      img.width = this.scan.width;
+      const tensor = tf.browser.fromPixels(img)
         .resizeNearestNeighbor([224, 224])
         .toFloat()
         .sub(offset)
         .div(offset)
         .expandDims();
-      const predictions = (<tf.Tensor<tf.Rank>> model.predict(image)).dataSync();
+      const predictions = (<tf.Tensor<tf.Rank>> model.predict(tensor)).dataSync();
       console.log(`${typeof predictions} - ${predictions}`);
       if (predictions[0] > 0.5) {
         console.log(`Custom 404: ${key}`);
