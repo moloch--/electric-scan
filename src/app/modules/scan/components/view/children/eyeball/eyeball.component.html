@@ -1,6 +1,6 @@
 <div>
 
-  <div *ngIf="!imagesCompleted">
+  <div *ngIf="!imagesCompleted || eyeballing">
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </div>
 
@@ -8,12 +8,63 @@
 
     <h1>
       <i class="fas fa-fw fa-eye"></i>
-      Eyeballer 
+      Eyeballer
     </h1>
 
-    <button mat-button (click)="eyeballScan()">
+    <button *ngIf="!eyeballCompleted" mat-button (click)="eyeballScan()">
       Eyeball Scan
     </button>
+
+    <div *ngIf="scan && eyeballCompleted" class="results-container">
+
+      <h2>{{ LOGIN_PAGE }}</h2>
+      <div class="eyeballed-class-container">
+        
+        <div *ngFor="let resultId of classifications.loginPage; let index = index" [attr.data-index]="index">
+          <mat-card class="result-card">
+            <mat-card-header>
+              <mat-card-title>
+                <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before"
+                  matBadgeColor="primary">
+                  {{ scanResults.get(resultId).target | urlTitle }}
+                </span>
+              </mat-card-title>
+              <mat-card-subtitle class="monospace">
+                {{ scanResults.get(resultId).target }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <img mat-card-image [attr.src]="(resultId | dataUrl: this.scan.id) | async">
+            <div>
+              <i class="fa fa-fw fa-2x fa-search"></i>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+
+      <h2>{{ CUSTOM_404 }}</h2>
+      <div class="eyeballed-class-container">
+        <div *ngFor="let resultId of classifications.custom404; let index = index" [attr.data-index]="index">
+          <mat-card class="result-card">
+            <mat-card-header>
+              <mat-card-title>
+                <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before"
+                  matBadgeColor="primary">
+                  {{ scanResults.get(resultId).target | urlTitle }}
+                </span>
+              </mat-card-title>
+              <mat-card-subtitle class="monospace">
+                {{ scanResults.get(resultId).target }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <img  mat-card-image [attr.src]="(resultId | dataUrl: this.scan.id) | async">
+            <div>
+              <i class="fa fa-fw fa-2x fa-search"></i>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+
+    </div>
 
   </div>
 </div>

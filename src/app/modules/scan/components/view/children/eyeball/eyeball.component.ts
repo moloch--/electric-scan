@@ -6,10 +6,10 @@ import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service
 
 
 export interface EyeballClassification {
-  CUSTOM_404: string[];
-  LOGIN_PAGE: string[];
-  HOMEPAGE: string[];
-  OLD_LOOKING: string[];
+  custom404: string[];
+  loginPage: string[];
+  homePage: string[];
+  oldLooking: string[];
 }
 
 
@@ -26,14 +26,17 @@ export class EyeballComponent implements OnInit {
   readonly OLD_LOOKING = 'Old Looking';
 
   scan: Scan;
+  scanResults = new Map<string, ScanResult>();
   images = new Map<string, string>();
   imagesCompleted = false;
+  eyeballing = false;
+  eyeballCompleted = false;
 
   classifications: EyeballClassification = {
-    CUSTOM_404: [],
-    LOGIN_PAGE: [],
-    HOMEPAGE: [],
-    OLD_LOOKING: [],
+    custom404: [],
+    loginPage: [],
+    homePage: [],
+    oldLooking: [],
   };
 
   constructor(private _route: ActivatedRoute,
@@ -48,6 +51,7 @@ export class EyeballComponent implements OnInit {
         .map(async (result: ScanResult) => {
           const img = await this._scannerService.getDataUrl(this.scan.id, result.id);
           this.images.set(result.id, img);
+          this.scanResults.set(result.id, result);
       }));
       this.imagesCompleted = true;
     });
@@ -55,6 +59,7 @@ export class EyeballComponent implements OnInit {
 
   async eyeballScan(): Promise<void> {
     console.log('eyeballing ...');
+    this.eyeballing = true;
     const tfFiles = await this._scannerService.tfFiles();
     const model = await tf.loadLayersModel(tf.io.browserFiles(tfFiles));
     const offset = tf.scalar(127.5);
@@ -76,23 +81,25 @@ export class EyeballComponent implements OnInit {
       console.log(`${typeof predictions} - ${predictions}`);
       if (predictions[0] > 0.5) {
         console.log(`Custom 404: ${key}`);
-        this.classifications.CUSTOM_404.push(key);
+        this.classifications.custom404.push(key);
       }
       if (predictions[1] > 0.5) {
         console.log(`Login Page: ${key}`);
-        this.classifications.LOGIN_PAGE.push(key);
+        this.classifications.loginPage.push(key);
       }
       if (predictions[2] > 0.5) {
         console.log(`Homepage: ${key}`);
-        this.classifications.HOMEPAGE.push(key);
+        this.classifications.homePage.push(key);
       }
       if (predictions[3] > 0.5) {
         console.log(`Old Looking: ${key}`);
-        this.classifications.OLD_LOOKING.push(key);
+        this.classifications.oldLooking.push(key);
       }
     }
 
     console.log(this.classifications);
+    this.eyeballing = false;
+    this.eyeballCompleted = true;
   }
 
 }
