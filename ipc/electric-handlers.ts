@@ -201,7 +201,7 @@ export class ElectricHandlers {
     const tfDir = path.join(__dirname, 'tf');
     const tfFileNames = await ClientHandlers.lsDir(tfDir);
     const tfDataUrls = {};
-    await Promise.all(tfFileNames.filter(f => f.endsWith('.json')).map((fn) => {
+    await Promise.all(tfFileNames.map((fn) => {
       return new Promise((resolve) => {
         const tfFile = path.join(tfDir, fn);
         fs.readFile(tfFile, {encoding: null}, (_, data: Buffer) => {

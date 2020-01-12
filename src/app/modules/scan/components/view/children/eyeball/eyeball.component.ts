@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as tf from '@tensorflow/tfjs';
 
-import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
+import { ScannerService, Scan } from '@app/providers/scanner.service';
 
 
 export interface EyeballClassification {
@@ -60,36 +60,37 @@ export class EyeballComponent implements OnInit {
     const tfFiles = await this._scannerService.tfFiles();
     const model = await tf.loadLayersModel(tf.io.browserFiles(tfFiles));
     const offset = tf.scalar(127.5);
-    console.log(Array.from(this.images.keys()));
-    for (let key in Array.from(this.images.keys())) {
+    const keys = Array.from(this.images.keys());
+    for (let index = 0; index < keys.length; ++index) {
+      const key = keys[index];
       console.log(`classifying: ${key}`);
-      const imageElem: HTMLImageElement = <HTMLImageElement>document.createElement('img');
-      imageElem.width = 1920;
-      imageElem.height = 1080;
-      imageElem.src = this.images.get(key);
-      const image = tf.browser.fromPixels(imageElem)
+      const img = new Image();
+      img.src = this.images.get(key);
+      img.height = 1080;
+      img.width = 1920;
+      const image = tf.browser.fromPixels(img)
         .resizeNearestNeighbor([224, 224])
         .toFloat()
         .sub(offset)
         .div(offset)
         .expandDims();
-      const predictions = model.predict(image);
+      const predictions = (<tf.Tensor<tf.Rank>> model.predict(image)).dataSync();
       console.log(`${typeof predictions} - ${predictions}`);
       if (predictions[0] > 0.5) {
-        console.log(`Custom 404: ${imageElem.id}`);
-        this.classifications.CUSTOM_404.push(imageElem.id);
+        console.log(`Custom 404: ${key}`);
+        this.classifications.CUSTOM_404.push(key);
       }
       if (predictions[1] > 0.5) {
-        console.log(`Login Page: ${imageElem.id}`);
-        this.classifications.LOGIN_PAGE.push(imageElem.id);
+        console.log(`Login Page: ${key}`);
+        this.classifications.LOGIN_PAGE.push(key);
       }
       if (predictions[2] > 0.5) {
-        console.log(`Homepage: ${imageElem.id}`);
-        this.classifications.HOMEPAGE.push(imageElem.id);
+        console.log(`Homepage: ${key}`);
+        this.classifications.HOMEPAGE.push(key);
       }
       if (predictions[3] > 0.5) {
-        console.log(`Old Looking: ${imageElem.id}`);
-        this.classifications.OLD_LOOKING.push(imageElem.id);
+        console.log(`Old Looking: ${key}`);
+        this.classifications.OLD_LOOKING.push(key);
       }
     }
 

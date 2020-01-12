@@ -1,6 +1,6 @@
 {
   "name": "electric-scan",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Electric Scan",
   "license": "GPLv2",
   "homepage": "https://bishopfox.com/",
@@ -90,6 +90,7 @@
     "moment": "^2.24.0",
     "ngx-infinite-scroll": "^8.0.1",
     "pako": "^1.0.10",
+    "resemblejs": "^3.2.3",
     "rxjs": "^6.5.3",
     "uuid": "^3.3.3",
     "write-file-atomic": "^3.0.1"

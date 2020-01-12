@@ -18,7 +18,7 @@ import { ModuleWithProviders } from '@angular/core';
 import { HistoryComponent } from './components/history/history.component';
 import { ViewComponent } from './components/view/view.component';
 import { NewComponent } from './components/new/new.component';
-import { EyeballComponent } from './components/eyeball/eyeball.component';
+import { EyeballComponent } from './components/view/children/eyeball/eyeball.component';
 
 const routes: Routes = [
 

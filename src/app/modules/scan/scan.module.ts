@@ -11,7 +11,9 @@ import {
   ViewComponent, DetailsDialogComponent, OpenUrlDialogComponent
 } from './components/view/view.component';
 import { UrlTitlePipe, DatePipe, DataUrlPipe } from './scan.pipes';
-import { EyeballComponent } from './components/eyeball/eyeball.component';
+import { EyeballComponent } from './components/view/children/eyeball/eyeball.component';
+import { ResemblesComponent } from './components/view/children/resembles/resembles.component';
+import { AllComponent } from './components/view/children/all/all.component';
 
 
 @NgModule({
@@ -26,6 +28,8 @@ import { EyeballComponent } from './components/eyeball/eyeball.component';
     DatePipe,
     DataUrlPipe,
     EyeballComponent,
+    ResemblesComponent,
+    AllComponent,
   ],
   imports: [
     CommonModule,
