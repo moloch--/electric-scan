@@ -20,11 +20,11 @@
 import { ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as base64 from 'base64-arraybuffer';
 
 import { jsonSchema } from './jsonschema';
 import { ElectricScanner } from '../scanner';
 import { ClientHandlers } from './client-handlers';
-
 import { SCANS_DIR } from './constants';
 
 
@@ -195,6 +195,22 @@ export class ElectricHandlers {
     } catch(err) {
       return Promise.reject(err);
     }
+  }
+
+  static async electric_tfFiles(_: string): Promise<string> {
+    const tfDir = path.join(__dirname, 'tf');
+    const tfFileNames = await ClientHandlers.lsDir(tfDir);
+    const tfDataUrls = {};
+    await Promise.all(tfFileNames.filter(f => f.endsWith('.json')).map((fn) => {
+      return new Promise((resolve) => {
+        const tfFile = path.join(tfDir, fn);
+        fs.readFile(tfFile, {encoding: null}, (_, data: Buffer) => {
+          tfDataUrls[path.basename(tfFile)] = base64.encode(data.buffer);
+          resolve();
+        });
+      });
+    }));
+    return JSON.stringify(tfDataUrls);
   }
 
 }

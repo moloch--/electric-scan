@@ -1,1 +1,19 @@
-<p>eyeball works!</p>
+<div>
+
+  <div *ngIf="!imagesCompleted">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <div *ngIf="imagesCompleted">
+
+    <h1>
+      <i class="fas fa-fw fa-eye"></i>
+      Eyeballer 
+    </h1>
+
+    <button mat-button (click)="eyeballScan()">
+      Eyeball Scan
+    </button>
+
+  </div>
+</div>

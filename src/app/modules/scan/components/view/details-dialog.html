@@ -6,7 +6,7 @@
   </button>
 </h1>
 <div mat-dialog-content>
-  <img *ngIf="result.error === ''" style="width: 100%;" [src]="result.id | dataUrl: this.scan.id | async">
+  <img *ngIf="result.error === ''" style="width: 100%;" [attr.src]="(result.id | dataUrl: this.scan.id) | async">
   <p *ngIf="result.error !== ''">
     <i class="fas fa-fw fa-exclamation-triangle"></i>
     {{ result.error }}

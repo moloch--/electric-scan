@@ -141,7 +141,7 @@ export class ElectricScanner {
         if (screenshot.image) {
           const filePNG = path.join(this._scanDir, `${resultId}.png`);
           const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
-          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: 'binary'}, (err: NodeJS.ErrnoException) => {
+          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: null}, (err: NodeJS.ErrnoException) => {
             err ? console.error(err) : null;
           });
 

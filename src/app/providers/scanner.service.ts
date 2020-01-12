@@ -19,6 +19,7 @@
 
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import * as base64 from 'base64-arraybuffer';
 
 import { IPCService } from './ipc.service';
 
@@ -115,10 +116,10 @@ export class ScannerService {
   async getDataUrl(scanId: string, resultId: string): Promise<string> {
     let dataUrl = this._imageCache.get(resultId);
     if (dataUrl !== null) {
-      console.log(`cache hit: ${resultId}`);
+      // console.log(`cache hit: ${resultId}`);
       return dataUrl;
     }
-    console.log(`cache miss: ${resultId}`);
+    // console.log(`cache miss: ${resultId}`);
     const resp = await this._ipc.request('electric_getDataUrl', JSON.stringify({
       scanId: scanId,
       resultId: resultId,
@@ -153,6 +154,36 @@ export class ScannerService {
       console.error('Error parsing ListScans response');
       console.error(err);
     }
+  }
+
+  async tfFiles(): Promise<File[]> {
+    const resp = await this._ipc.request('electric_tfFiles', '');
+    try {
+      const tfResp = JSON.parse(resp);
+      console.log(tfResp);
+      const tfDir = new Map();
+      for (let key in tfResp) {
+        tfDir[key] = tfResp[key];
+      }
+      const tfFiles: File[] = [];
+      for (let fileName in tfDir) {
+        const dataBuf = base64.decode(tfDir[fileName]);
+        const data = new Blob([new Uint8Array(dataBuf)]);
+        tfFiles.push(this.blobToFile(data, fileName));
+      }
+      console.log(tfFiles);
+      return tfFiles;
+    } catch (err) {
+      console.error('Error loading tf files');
+      console.error(err);
+    }
+  }
+
+  private blobToFile(data: Blob, fileName: string): File {
+    var blob: any = data;
+    blob.lastModifiedDate = new Date();
+    blob.name = fileName;
+    return <File>blob;
   }
 
 }

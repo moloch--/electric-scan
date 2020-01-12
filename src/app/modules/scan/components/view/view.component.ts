@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, Inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuTrigger, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
@@ -35,6 +35,7 @@ export class ViewComponent implements OnInit {
 
   constructor(public dialog: MatDialog,
               private _route: ActivatedRoute,
+              private _router: Router,
               private _scannerService: ScannerService,
               private _clientService: ClientService) { }
 
@@ -150,6 +151,10 @@ export class ViewComponent implements OnInit {
     this.contextMenuPosition.y = event.clientY + 'px';
     this.contextMenu.menuData = { 'item': result };
     this.contextMenu.openMenu();
+  }
+
+  onEyeballer() {
+    this._router.navigate(['scan', 'eyeballer', this.scan.id]);
   }
 
 }
