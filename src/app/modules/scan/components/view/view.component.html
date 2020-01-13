@@ -10,74 +10,16 @@
   <div *ngIf="scan && isComplete()">
     <mat-toolbar>
       <span>{{ scan.name }}</span>
-      
       <span class="fill-remaining-space"></span>
-
       <button mat-stroked-button (click)="saveAllAs()">
         <i class="fas fa-fw fa-save"></i>
         Save All
-      </button>
-
-      <button mat-stroked-button (click)="onEyeballer()">
-        <i class="fas fa-fw fa-eye"></i>
-        Eyeballer
-      </button>
-  
+      </button>  
       <span class="fill-space"></span>
-
-      <mat-slide-toggle color="primary" [(ngModel)]="hideErrors">
-        <i class="fas fa-fw fa-eye-slash"></i>
-        Hide Errors
-      </mat-slide-toggle>
-
     </mat-toolbar>
+
+    <router-outlet></router-outlet>
+
   </div>
 
-  <div *ngIf="scan" class="results-container"
-      infiniteScroll
-      [infiniteScrollDistance]="2"
-      (scrolled)="onScroll()">
-
-    <div *ngFor="let result of displayedResults; let index = index" [attr.data-index]="index">
-
-      <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
-        <mat-card-header>
-          <mat-card-title>
-            <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before" matBadgeColor="primary">
-              {{ result.target | urlTitle }}
-            </span>
-          </mat-card-title>
-          <mat-card-subtitle class="monospace">
-            {{ result.target }}
-          </mat-card-subtitle>
-        </mat-card-header>
-        <img *ngIf="result.error === ''" mat-card-image [attr.src]="(result.id | dataUrl: this.scan.id) | async">
-        <p *ngIf="result.error">
-          {{ result.error }}
-        </p>
-        <div>
-          <i class="fa fa-fw fa-2x fa-search"></i>
-        </div>
-      </mat-card>
-    </div>
-  </div>
 </div>
-
-<div style="visibility: hidden; position: fixed"
-  [style.left]="contextMenuPosition.x"
-  [style.top]="contextMenuPosition.y"
-  [matMenuTriggerFor]="contextMenu">
-</div>
-<mat-menu #contextMenu="matMenu">
-  <ng-template matMenuContent let-item="item">
-    <button mat-menu-item (click)="details(item)">
-      View Details
-    </button>
-    <button mat-menu-item (click)="saveAs(item)">
-      Save As
-    </button>
-    <button mat-menu-item (click)="openUrl(item)">
-      Open URL
-    </button>
-  </ng-template>
-</mat-menu>

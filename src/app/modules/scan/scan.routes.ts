@@ -18,14 +18,24 @@ import { ModuleWithProviders } from '@angular/core';
 import { HistoryComponent } from './components/history/history.component';
 import { ViewComponent } from './components/view/view.component';
 import { NewComponent } from './components/new/new.component';
-import { EyeballComponent } from './components/eyeball/eyeball.component';
+import { AllComponent } from './components/view/children/all/all.component';
+import { EyeballComponent } from './components/view/children/eyeball/eyeball.component';
+import { ResemblesComponent } from './components/view/children/resembles/resembles.component';
+
 
 const routes: Routes = [
 
     { path: 'scan/history', component: HistoryComponent },
     { path: 'scan/new', component: NewComponent },
     { path: 'scan/view/:scan-id', component: ViewComponent, },
-    { path: 'scan/eyeballer/:scan-id', component: EyeballComponent, },
+    { path: 'scan/eyeballer/:scan-id', component: EyeballComponent, 
+      children: [
+        { path: '', component: AllComponent },
+        { path: 'all', component: AllComponent },
+        { path: 'eyeball', component: EyeballComponent },
+        { path: 'resembles', component: ResemblesComponent },
+      ]
+    },
 
 ];
 
