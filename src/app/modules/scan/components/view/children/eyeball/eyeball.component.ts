@@ -42,16 +42,27 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
   ngOnInit() {
     this._route.parent.params.subscribe(async (params) => {
       this.scan = await this._scannerService.getScan(params['scan-id']);
-      await Promise.all(this.scan.results
-        .filter((result: ScanResult) => result.error === '')
-        .map(async (result: ScanResult) => {
-          const img = await this._scannerService.getDataUrl(this.scan.id, result.id);
-          this.images.set(result.id, img);
-          this.scanResults.set(result.id, result);
-      }));
-      this.imagesCompleted = true;
-      this.eyeballScan();
+      const eyeball = await this._scannerService.getEyeball(this.scan.id);
+      if (eyeball !== null) {
+        this.classifications = eyeball;
+        this.eyeballCompleted = true;
+        this.loadAllImages();
+      } else {
+        await this.loadAllImages();
+        this.eyeballScan();
+      }
     });
+  }
+
+  async loadAllImages() {
+    await Promise.all(this.scan.results
+      .filter((result: ScanResult) => result.error === '')
+      .map(async (result: ScanResult) => {
+        const img = await this._scannerService.getDataUrl(this.scan.id, result.id);
+        this.images.set(result.id, img);
+        this.scanResults.set(result.id, result);
+    }));
+    this.imagesCompleted = true;
   }
 
   resultsOf(resultIds: string[]): ScanResult[] {
@@ -101,10 +112,9 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
         this.classifications.oldLooking.push(key);
       }
     }
-
-    console.log(this.classifications);
     this.eyeballing = false;
     this.eyeballCompleted = true;
+    this._scannerService.saveEyeball(this.scan.id, this.classifications);
   }
 
 }
