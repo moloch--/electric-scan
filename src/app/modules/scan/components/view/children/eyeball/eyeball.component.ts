@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as tf from '@tensorflow/tfjs';
 
 import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
+import { FadeInOut } from '@app/shared/animations';
 
 
 export interface EyeballClassification {
@@ -12,11 +13,11 @@ export interface EyeballClassification {
   oldLooking: string[];
 }
 
-
 @Component({
   selector: 'app-eyeball',
   templateUrl: './eyeball.component.html',
-  styleUrls: ['./eyeball.component.scss']
+  styleUrls: ['./eyeball.component.scss'],
+  animations: [FadeInOut]
 })
 export class EyeballComponent implements OnInit {
 
@@ -43,9 +44,8 @@ export class EyeballComponent implements OnInit {
               private _scannerService: ScannerService) { }
 
   ngOnInit() {
-    this._route.params.subscribe(async (params) => {
+    this._route.parent.params.subscribe(async (params) => {
       this.scan = await this._scannerService.getScan(params['scan-id']);
-      console.log(this.scan);
       await Promise.all(this.scan.results
         .filter((result: ScanResult) => result.error === '')
         .map(async (result: ScanResult) => {

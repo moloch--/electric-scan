@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
+
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 import { BaseMaterialModule } from '@app/base-material';
@@ -23,16 +25,17 @@ import { AllComponent } from './components/view/children/all/all.component';
     ViewComponent, 
     DetailsDialogComponent,
     OpenUrlDialogComponent,
+    EyeballComponent,
+    ResemblesComponent,
+    AllComponent,
 
     UrlTitlePipe,
     DatePipe,
     DataUrlPipe,
-    EyeballComponent,
-    ResemblesComponent,
-    AllComponent,
   ],
   imports: [
     CommonModule,
+    RouterModule,
     FormsModule,
     ReactiveFormsModule,
     BaseMaterialModule,

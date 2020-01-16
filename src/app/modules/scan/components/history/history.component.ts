@@ -47,7 +47,7 @@ export class HistoryComponent implements OnInit {
   }
 
   onRowSelection(scan: Scan) {
-    this._router.navigate(['scan', 'view', scan.id]);
+    this._router.navigate(['/scan', 'view', scan.id]);
   }
 
   async deleteScan(scan: Scan) {

@@ -7,7 +7,7 @@
     <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
   </div>
 
-  <div *ngIf="scan && isComplete()">
+  <div *ngIf="scan">
     <mat-toolbar>
       <span>{{ scan.name }}</span>
       <span class="fill-remaining-space"></span>
@@ -15,9 +15,19 @@
         <i class="fas fa-fw fa-save"></i>
         Save All
       </button>  
-      <span class="fill-space"></span>
+
     </mat-toolbar>
 
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link
+         *ngFor="let link of navLinks"
+         [routerLink]="link.path"
+         routerLinkActive #rla="routerLinkActive"
+         [active]="rla.isActive">
+        {{link.label}}
+      </a>
+    </nav>
+    
     <router-outlet></router-outlet>
 
   </div>

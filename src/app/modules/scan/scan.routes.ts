@@ -27,10 +27,9 @@ const routes: Routes = [
 
     { path: 'scan/history', component: HistoryComponent },
     { path: 'scan/new', component: NewComponent },
-    { path: 'scan/view/:scan-id', component: ViewComponent, },
-    { path: 'scan/eyeballer/:scan-id', component: EyeballComponent, 
+    { path: 'scan/view/:scan-id', component: ViewComponent,
       children: [
-        { path: '', component: AllComponent },
+        { path: '', redirectTo: 'all', pathMatch: 'full' },
         { path: 'all', component: AllComponent },
         { path: 'eyeball', component: EyeballComponent },
         { path: 'resembles', component: ResemblesComponent },
@@ -40,3 +39,4 @@ const routes: Routes = [
 ];
 
 export const ScanModuleRouting: ModuleWithProviders = RouterModule.forChild(routes);
+

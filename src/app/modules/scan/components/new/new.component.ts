@@ -76,7 +76,7 @@ export class NewComponent implements OnInit {
     const margin = Number(this.startScanForm.controls['margin'].value);
     const targets = this.parseTargets(this.startScanForm.controls['targets'].value);
     const scan = await this._scannerService.startScan(name, targets, workers, width, height, timeout, margin);
-    this._router.navigate(['scan', 'view', scan['id']]);
+    this._router.navigate(['/scan', 'view', scan['id']]);
   }
   
   parseTargets(rawTargets: string): string[] {

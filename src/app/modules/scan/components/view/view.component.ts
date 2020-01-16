@@ -1,11 +1,12 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 
+import { Subscription } from 'rxjs';
+
 import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
-import { ClientService } from '@app/providers/client.service';
 import { FadeInOut } from '@app/shared/animations';
+
 
 
 export interface Dialogs {
@@ -19,43 +20,52 @@ export interface Dialogs {
   styleUrls: ['./view.component.scss'],
   animations: [FadeInOut]
 })
-export class ViewComponent implements OnInit, Dialogs {
+export class ViewComponent implements OnInit {
 
   scan: Scan;
+  progress: number = 0;
 
-  constructor(public dialog: MatDialog, 
-              public route: ActivatedRoute,
-              public scannerService: ScannerService,
-              public clientService: ClientService) { }
+  navLinks = [
+    { path: 'all', label: 'All' },
+    { path: 'eyeball', label: 'Eyeballer' },
+    { path: 'resembles', label: 'Resembles' },
+  ];
+
+  private scanSub: Subscription;
+
+  constructor(public route: ActivatedRoute,
+              public router: Router,
+              public scannerService: ScannerService) { }
 
   ngOnInit() {
     this.route.params.subscribe(async (params) => {
       this.scan = await this.scannerService.getScan(params['scan-id']);
+      this.scanSub = this.scannerService.scans$.subscribe((scan) => {
+        if (this.scan.id === scan.id) {
+          this.scan = scan;
+          this.updateProgress();
+        }
+      });
     });
   }
 
-  saveAs(result: ScanResult) {
-    this.clientService.saveImageAs(this.scan.id, result.id);
+  ngOnDestroy() {
+    this.scanSub.unsubscribe();
   }
 
-  saveAllAs() {
-    this.clientService.saveAllAs(this.scan.id);
+  private updateProgress() {
+    if (this.scan) {
+      const hasResult = this.scan.results.filter(result => result !== null);
+      this.progress = Math.floor((hasResult.length / this.scan.results.length) * 100.0);
+    } else {
+      this.progress = 0;
+    }
   }
 
-  openUrl(result: ScanResult) {
-    const dialogRef = this.dialog.open(OpenUrlDialogComponent, {
-      data: {
-        scan: this.scan,
-        result: result,
-      }
-    });
-    const dialogSub = dialogRef.afterClosed().subscribe(async (data) => {
-      if (data) {
-        this.clientService.openUrl(data.result.target);
-      }
-      dialogSub.unsubscribe();
-    });
+  isComplete(): boolean {
+    return this.scan ? this.scan.duration !== -1 : false;
   }
+
 
 }
 

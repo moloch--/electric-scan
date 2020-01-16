@@ -25,6 +25,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
 
 import { SharedModule } from './shared/shared.module';
 import { AppRoutingModule } from './app-routing.module';
@@ -40,6 +41,7 @@ import { ClientService } from '@app/providers/client.service';
 import { AppComponent } from './app.component';
 import { TopMenuComponent } from './components/top-menu/top-menu.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { NotFoundComponent } from './components/not-found/not-found.component';
 
 
 @NgModule({
@@ -48,10 +50,11 @@ import { SettingsComponent } from './components/settings/settings.component';
     // Components
     AppComponent,
     TopMenuComponent,
-
-    SettingsComponent
+    SettingsComponent,
+    NotFoundComponent
   ],
   imports: [
+    RouterModule,
     BrowserModule,
     FormsModule,
     BrowserAnimationsModule,
@@ -59,8 +62,8 @@ import { SettingsComponent } from './components/settings/settings.component';
     BaseMaterialModule,
 
     // Routes
-    AppRoutingModule,
     ScanModuleRouting,
+    AppRoutingModule,
 
     // Modules
     ScanModule,

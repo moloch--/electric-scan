@@ -18,7 +18,6 @@ import { DetailsDialogComponent, OpenUrlDialogComponent } from '../../view.compo
 })
 export class AllComponent implements OnInit {
 
-  progress: number = 0;
   private _hideErrors = false;
   displayedResults: ScanResult[];
 
@@ -26,7 +25,7 @@ export class AllComponent implements OnInit {
   readonly pageSize = 30;
 
   private _scan: Scan;
-  private _scanSub: Subscription;
+  private scanSub: Subscription;
 
   @ViewChild(MatMenuTrigger, { static: false }) contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
@@ -38,10 +37,10 @@ export class AllComponent implements OnInit {
               public clientService: ClientService) { }
 
   ngOnInit() {
-    this.route.params.subscribe(async (params) => {
+    this.route.parent.params.subscribe(async (params) => {
       this.scan = await this.scannerService.getScan(params['scan-id']);
-      this._scanSub = this.scannerService.scans$.subscribe((scan) => {
-        if (scan.id === this.scan.id) {
+      this.scanSub = this.scannerService.scans$.subscribe((scan) => {
+        if (this.scan.id === scan.id) {
           this.scan = scan;
         }
       });
@@ -49,7 +48,7 @@ export class AllComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this._scanSub.unsubscribe();
+    this.scanSub.unsubscribe();
   }
 
   get scan(): Scan {
@@ -58,7 +57,6 @@ export class AllComponent implements OnInit {
 
   set scan(scan: Scan) {
     this._scan = scan;
-    this._progress();
     this.updateDisplayResults();
   }
 
@@ -74,19 +72,6 @@ export class AllComponent implements OnInit {
   onScroll() {
     this.page++;
     this.updateDisplayResults();
-  }
-
-  isComplete(): boolean {
-    return this.scan ? this.scan.duration !== -1 : false;
-  }
-
-  private _progress() {
-    if (this.scan) {
-      const completed = this.scan.results.filter(res => res !== null);
-      this.progress = Math.floor((completed.length / this.scan.results.length) * 100.0);
-    } else {
-      this.progress = 0;
-    }
   }
 
   updateDisplayResults() {
