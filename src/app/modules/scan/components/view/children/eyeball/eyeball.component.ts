@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import * as tf from '@tensorflow/tfjs';
 
 import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
+import { ClientService } from '@app/providers/client.service';
 import { FadeInOut } from '@app/shared/animations';
+import { ContextMenuComponent } from '../../view.component';
 
 
 export interface EyeballClassification {
-  custom404: string[];
-  loginPage: string[];
-  homePage: string[];
-  oldLooking: string[];
+  custom404: ScanResult[];
+  loginPage: ScanResult[];
+  homePage: ScanResult[];
+  oldLooking: ScanResult[];
 }
 
 @Component({
@@ -19,7 +22,7 @@ export interface EyeballClassification {
   styleUrls: ['./eyeball.component.scss'],
   animations: [FadeInOut]
 })
-export class EyeballComponent implements OnInit {
+export class EyeballComponent extends ContextMenuComponent implements OnInit {
 
   readonly CUSTOM_404 = 'Custom 404';
   readonly LOGIN_PAGE = 'Login Page';
@@ -32,6 +35,7 @@ export class EyeballComponent implements OnInit {
   imagesCompleted = false;
   eyeballing = false;
   eyeballCompleted = false;
+  confidence = 0.6;
 
   classifications: EyeballClassification = {
     custom404: [],
@@ -40,8 +44,12 @@ export class EyeballComponent implements OnInit {
     oldLooking: [],
   };
 
-  constructor(private _route: ActivatedRoute,
-              private _scannerService: ScannerService) { }
+  constructor(public dialog: MatDialog,
+              public clientService: ClientService,
+              private _route: ActivatedRoute,
+              private _scannerService: ScannerService) {
+                super(dialog, clientService);
+              }
 
   ngOnInit() {
     this._route.parent.params.subscribe(async (params) => {
@@ -54,6 +62,7 @@ export class EyeballComponent implements OnInit {
           this.scanResults.set(result.id, result);
       }));
       this.imagesCompleted = true;
+      this.eyeballScan();
     });
   }
 
@@ -79,21 +88,21 @@ export class EyeballComponent implements OnInit {
         .expandDims();
       const predictions = (<tf.Tensor<tf.Rank>> model.predict(tensor)).dataSync();
       console.log(`${typeof predictions} - ${predictions}`);
-      if (predictions[0] > 0.5) {
+      if (predictions[0] > this.confidence) {
         console.log(`Custom 404: ${key}`);
-        this.classifications.custom404.push(key);
+        this.classifications.custom404.push(this.scanResults.get(key));
       }
-      if (predictions[1] > 0.5) {
+      if (predictions[1] > this.confidence) {
         console.log(`Login Page: ${key}`);
-        this.classifications.loginPage.push(key);
+        this.classifications.loginPage.push(this.scanResults.get(key));
       }
-      if (predictions[2] > 0.5) {
+      if (predictions[2] > this.confidence) {
         console.log(`Homepage: ${key}`);
-        this.classifications.homePage.push(key);
+        this.classifications.homePage.push(this.scanResults.get(key));
       }
-      if (predictions[3] > 0.5) {
+      if (predictions[3] > this.confidence) {
         console.log(`Old Looking: ${key}`);
-        this.classifications.oldLooking.push(key);
+        this.classifications.oldLooking.push(this.scanResults.get(key));
       }
     }
 

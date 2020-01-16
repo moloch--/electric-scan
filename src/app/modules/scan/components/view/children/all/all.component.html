@@ -1,6 +1,3 @@
-
-<h1>All</h1>
-
 <div *ngIf="scan" class="results-container" infiniteScroll [infiniteScrollDistance]="2" (scrolled)="onScroll()">
 
   <div *ngFor="let result of displayedResults; let index = index" [attr.data-index]="index">
@@ -27,3 +24,22 @@
     </mat-card>
   </div>
 </div>
+
+<div style="visibility: hidden; position: fixed"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  [matMenuTriggerFor]="contextMenu">
+</div>
+<mat-menu #contextMenu="matMenu">
+  <ng-template matMenuContent let-item="item">
+    <button mat-menu-item (click)="details(item)">
+      View Details
+    </button>
+    <button mat-menu-item (click)="saveAs(item)">
+      Save As
+    </button>
+    <button mat-menu-item (click)="openUrl(item)">
+      Open URL
+    </button>
+  </ng-template>
+</mat-menu>

@@ -6,34 +6,72 @@
 
   <div *ngIf="imagesCompleted">
 
-    <h1>
-      <i class="fas fa-fw fa-eye"></i>
-      Eyeballer
-    </h1>
-
-    <button *ngIf="!eyeballCompleted" mat-button (click)="eyeballScan()">
-      Eyeball Scan
-    </button>
-
     <div *ngIf="scan && eyeballCompleted" class="results-container">
 
       <h2>{{ LOGIN_PAGE }}</h2>
       <div class="eyeballed-class-container">
         
-        <div *ngFor="let resultId of classifications.loginPage; let index = index" [attr.data-index]="index">
-          <mat-card class="result-card">
+        <div *ngFor="let result of classifications.loginPage; let index = index" [attr.data-index]="index">
+          <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
             <mat-card-header>
               <mat-card-title>
                 <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before"
                   matBadgeColor="primary">
-                  {{ scanResults.get(resultId).target | urlTitle }}
+                  {{ result.target | urlTitle }}
                 </span>
               </mat-card-title>
               <mat-card-subtitle class="monospace">
-                {{ scanResults.get(resultId).target }}
+                {{ result.target }}
               </mat-card-subtitle>
             </mat-card-header>
-            <img mat-card-image [attr.src]="(resultId | dataUrl: this.scan.id) | async">
+            <img  mat-card-image [attr.src]="(result.id | dataUrl: this.scan.id) | async">
+            <div>
+              <i class="fa fa-fw fa-2x fa-search"></i>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+
+      <h2>{{ OLD_LOOKING }}</h2>
+      <div class="eyeballed-class-container">
+        <div *ngFor="let result of classifications.oldLooking; let index = index" [attr.data-index]="index">
+          <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
+            <mat-card-header>
+              <mat-card-title>
+                <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before"
+                  matBadgeColor="primary">
+                  {{ result.target | urlTitle }}
+                </span>
+              </mat-card-title>
+              <mat-card-subtitle class="monospace">
+                {{ result.target }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <img  mat-card-image [attr.src]="(result.id | dataUrl: this.scan.id) | async">
+            <div>
+              <i class="fa fa-fw fa-2x fa-search"></i>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+
+
+      <h2>{{ HOMEPAGE }}</h2>
+      <div class="eyeballed-class-container">
+        <div *ngFor="let result of classifications.homePage; let index = index" [attr.data-index]="index">
+          <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
+            <mat-card-header>
+              <mat-card-title>
+                <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before"
+                  matBadgeColor="primary">
+                  {{ result.target | urlTitle }}
+                </span>
+              </mat-card-title>
+              <mat-card-subtitle class="monospace">
+                {{ result.target }}
+              </mat-card-subtitle>
+            </mat-card-header>
+            <img  mat-card-image [attr.src]="(result.id | dataUrl: this.scan.id) | async">
             <div>
               <i class="fa fa-fw fa-2x fa-search"></i>
             </div>
@@ -43,20 +81,20 @@
 
       <h2>{{ CUSTOM_404 }}</h2>
       <div class="eyeballed-class-container">
-        <div *ngFor="let resultId of classifications.custom404; let index = index" [attr.data-index]="index">
-          <mat-card class="result-card">
+        <div *ngFor="let result of classifications.custom404; let index = index" [attr.data-index]="index">
+          <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
             <mat-card-header>
               <mat-card-title>
                 <span matBadge="{{ index + 1 }}" matBadgeOverlap="false" matBadgePosition="above before"
                   matBadgeColor="primary">
-                  {{ scanResults.get(resultId).target | urlTitle }}
+                  {{ result.target | urlTitle }}
                 </span>
               </mat-card-title>
               <mat-card-subtitle class="monospace">
-                {{ scanResults.get(resultId).target }}
+                {{ result.target }}
               </mat-card-subtitle>
             </mat-card-header>
-            <img  mat-card-image [attr.src]="(resultId | dataUrl: this.scan.id) | async">
+            <img  mat-card-image [attr.src]="(result.id | dataUrl: this.scan.id) | async">
             <div>
               <i class="fa fa-fw fa-2x fa-search"></i>
             </div>
@@ -68,3 +106,22 @@
 
   </div>
 </div>
+
+<div style="visibility: hidden; position: fixed"
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  [matMenuTriggerFor]="contextMenu">
+</div>
+<mat-menu #contextMenu="matMenu">
+  <ng-template matMenuContent let-item="item">
+    <button mat-menu-item (click)="details(item)">
+      View Details
+    </button>
+    <button mat-menu-item (click)="saveAs(item)">
+      Save As
+    </button>
+    <button mat-menu-item (click)="openUrl(item)">
+      Open URL
+    </button>
+  </ng-template>
+</mat-menu>

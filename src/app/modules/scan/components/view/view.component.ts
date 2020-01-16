@@ -1,11 +1,14 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
+import { MatMenuTrigger } from '@angular/material';
+import { MatDialog } from '@angular/material/dialog';
 
 import { Subscription } from 'rxjs';
 
 import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
 import { FadeInOut } from '@app/shared/animations';
+import { ClientService } from '@app/providers/client.service';
 
 
 
@@ -13,6 +16,7 @@ export interface Dialogs {
   openUrl(result: ScanResult): void
   saveAs(result: ScanResult): void
 }
+
 
 @Component({
   selector: 'app-view',
@@ -31,29 +35,30 @@ export class ViewComponent implements OnInit {
     { path: 'resembles', label: 'Resembles' },
   ];
 
-  private scanSub: Subscription;
+  private _scanSub: Subscription;
 
   constructor(public route: ActivatedRoute,
               public router: Router,
+              public clientService: ClientService,
               public scannerService: ScannerService) { }
 
   ngOnInit() {
     this.route.params.subscribe(async (params) => {
       this.scan = await this.scannerService.getScan(params['scan-id']);
-      this.scanSub = this.scannerService.scans$.subscribe((scan) => {
+      this._scanSub = this.scannerService.scans$.subscribe((scan) => {
         if (this.scan.id === scan.id) {
           this.scan = scan;
-          this.updateProgress();
+          this._updateProgress();
         }
       });
     });
   }
 
   ngOnDestroy() {
-    this.scanSub.unsubscribe();
+    this._scanSub.unsubscribe();
   }
 
-  private updateProgress() {
+  private _updateProgress() {
     if (this.scan) {
       const hasResult = this.scan.results.filter(result => result !== null);
       this.progress = Math.floor((hasResult.length / this.scan.results.length) * 100.0);
@@ -66,10 +71,68 @@ export class ViewComponent implements OnInit {
     return this.scan ? this.scan.duration !== -1 : false;
   }
 
+  saveAllAs() {
+    this.clientService.saveAllAs(this.scan.id);
+  }
+
 
 }
 
 // --------------------- [ DIALOGS ] --------------------- 
+
+@Component({
+  selector: 'app-context-menu',
+  template: '',
+})
+export class ContextMenuComponent implements Dialogs {
+
+  scan: Scan;
+  @ViewChild(MatMenuTrigger, { static: false }) contextMenu: MatMenuTrigger;
+  contextMenuPosition = { x: '0px', y: '0px' };
+
+  constructor(public dialog: MatDialog,
+              public clientService: ClientService) { }
+
+  details(result: ScanResult) {
+    this.contextMenu.closeMenu();
+    this.dialog.open(DetailsDialogComponent, {
+      data: { 
+        scan: this.scan,
+        result: result,
+        parent: this,
+      }
+    });
+  }
+
+  saveAs(result: ScanResult) {
+    this.clientService.saveImageAs(this.scan.id, result.id);
+  }
+
+  openUrl(result: ScanResult) {
+    const dialogRef = this.dialog.open(OpenUrlDialogComponent, {
+      data: { 
+        scan: this.scan,
+        result: result,
+      }
+    });
+    const dialogSub = dialogRef.afterClosed().subscribe(async (data) => {
+      if (data) {
+        this.clientService.openUrl(data.result.target);
+      }
+      dialogSub.unsubscribe();
+    });
+  }
+
+  onContextMenu(event: MouseEvent, result: ScanResult) {
+    event.preventDefault();
+    this.contextMenuPosition.x = event.clientX + 'px';
+    this.contextMenuPosition.y = event.clientY + 'px';
+    this.contextMenu.menuData = { 'item': result };
+    this.contextMenu.openMenu();
+  }
+
+}
+
 
 @Component({
   selector: 'app-details-dialog',

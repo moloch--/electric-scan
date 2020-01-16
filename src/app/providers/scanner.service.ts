@@ -41,7 +41,7 @@ export interface Scan {
   height: number;
 }
 
-// LRU Cache to Hold Image DataUrls
+// Basic LRU Cache to Avoid too much IPC
 class LRUCache<T> {
 
   private _cache: Map<string, T> = new Map<string, T>();
@@ -76,6 +76,9 @@ class LRUCache<T> {
 export class ScannerService {
 
   private _imageCache = new LRUCache<string>();
+  private _scanCache = new LRUCache<Scan>();
+  // private _eyeballCache = new LRUCache<string>();
+  // private _resemblesCache = new LRUCache<string>();
 
   scans$ = new Subject<Scan>();
 
@@ -104,11 +107,19 @@ export class ScannerService {
   }
 
   async getScan(scanId: string): Promise<Scan> {
+    let scan: Scan = this._scanCache.get(scanId);
+    if (scan !== null) {
+      return scan;
+    }
     const resp = await this._ipc.request('electric_metadata', JSON.stringify({
       scanId: scanId,
     }));
     try {
-      return JSON.parse(resp);
+      scan = JSON.parse(resp);
+      if (scan.duration !== -1) {
+        this._scanCache.put(scanId, scan);  // Only cache completed scans
+      }
+      return scan;
     } catch (err) {
       console.error(`Error parsing GetScan response: ${resp}`);
       console.error(err);
@@ -118,10 +129,8 @@ export class ScannerService {
   async getDataUrl(scanId: string, resultId: string): Promise<string> {
     let dataUrl = this._imageCache.get(resultId);
     if (dataUrl !== null) {
-      // console.log(`cache hit: ${resultId}`);
       return dataUrl;
     }
-    // console.log(`cache miss: ${resultId}`);
     const resp = await this._ipc.request('electric_getDataUrl', JSON.stringify({
       scanId: scanId,
       resultId: resultId,

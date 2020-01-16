@@ -1,13 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { MatMenuTrigger } from '@angular/material';
 
 import { FadeInOut } from '@app/shared/animations';
 import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
 import { ClientService } from '@app/providers/client.service';
-import { DetailsDialogComponent, OpenUrlDialogComponent } from '../../view.component';
+import { ContextMenuComponent } from '../../view.component';
 
 
 @Component({
@@ -16,7 +15,7 @@ import { DetailsDialogComponent, OpenUrlDialogComponent } from '../../view.compo
   styleUrls: ['./all.component.scss'],
   animations: [FadeInOut]
 })
-export class AllComponent implements OnInit {
+export class AllComponent extends ContextMenuComponent implements OnInit {
 
   private _hideErrors = false;
   displayedResults: ScanResult[];
@@ -27,14 +26,13 @@ export class AllComponent implements OnInit {
   private _scan: Scan;
   private scanSub: Subscription;
 
-  @ViewChild(MatMenuTrigger, { static: false }) contextMenu: MatMenuTrigger;
-  contextMenuPosition = { x: '0px', y: '0px' };
-
-  constructor(public dialog: MatDialog,
-              public route: ActivatedRoute,
+  constructor(public route: ActivatedRoute,
               public router: Router,
+              public dialog: MatDialog,
               public scannerService: ScannerService,
-              public clientService: ClientService) { }
+              public clientService: ClientService) {
+                super(dialog, clientService);
+              }
 
   ngOnInit() {
     this.route.parent.params.subscribe(async (params) => {
@@ -87,49 +85,5 @@ export class AllComponent implements OnInit {
       this.displayedResults = completed;
     }
   }
-
-  details(result: ScanResult) {
-    this.contextMenu.closeMenu();
-    this.dialog.open(DetailsDialogComponent, {
-      data: { 
-        scan: this.scan,
-        result: result,
-        parent: this,
-      }
-    });
-  }
-
-  saveAs(result: ScanResult) {
-    console.log(`Save image ${this.scan.id}/${result.id}.png`)
-    this.clientService.saveImageAs(this.scan.id, result.id);
-  }
-
-  saveAllAs() {
-    this.clientService.saveAllAs(this.scan.id);
-  }
-
-  openUrl(result: ScanResult) {
-    const dialogRef = this.dialog.open(OpenUrlDialogComponent, {
-      data: { 
-        scan: this.scan,
-        result: result,
-      }
-    });
-    const dialogSub = dialogRef.afterClosed().subscribe(async (data) => {
-      if (data) {
-        this.clientService.openUrl(data.result.target);
-      }
-      dialogSub.unsubscribe();
-    });
-  }
-
-  onContextMenu(event: MouseEvent, result: ScanResult) {
-    event.preventDefault();
-    this.contextMenuPosition.x = event.clientX + 'px';
-    this.contextMenuPosition.y = event.clientY + 'px';
-    this.contextMenu.menuData = { 'item': result };
-    this.contextMenu.openMenu();
-  }
-
 
 }
