@@ -209,7 +209,7 @@ export class ClientHandlers {
   })
   static async client_saveSettings(req: string): Promise<string> {
     try {
-      fs.writeFile(SETTINGS_PATH, req, { mode: 0o600 }, (err) => {
+      fs.writeFile(SETTINGS_PATH, req, {mode: 0o600}, (err) => {
         err ? console.error(err) : null;
       });
       return req;

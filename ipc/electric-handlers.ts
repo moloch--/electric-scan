@@ -25,7 +25,15 @@ import * as base64 from 'base64-arraybuffer';
 import { jsonSchema } from './jsonschema';
 import { ElectricScanner } from '../scanner';
 import { ClientHandlers } from './client-handlers';
-import { SCANS_DIR } from './constants';
+import { SCANS_DIR, EYEBALL_FILE } from './constants';
+
+
+const GUID = { "type": "string", "minLength": 36, "maxLength": 36 };
+const ARRAY_OF_GUIDS = {
+  "type": "array",
+  "items": GUID,
+  "additionalItems": false
+};
 
 
 export class ElectricHandlers {
@@ -72,14 +80,13 @@ export class ElectricHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "scan": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": GUID,
     },
     "required": ["scanId"]
   })
   static async electric_rmScan(req: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
-      const rmScanReq = JSON.parse(req);
-      const scanId = path.basename(rmScanReq.scan);
+      const scanId = path.basename(JSON.parse(req).scanId);
       const scanDir = path.join(SCANS_DIR, scanId);
       if (fs.existsSync(scanDir)) {
 
@@ -157,7 +164,7 @@ export class ElectricHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": GUID,
     },
     "required": ["scanId"],
   })
@@ -176,8 +183,8 @@ export class ElectricHandlers {
   @jsonSchema({
     "type": "object",
     "properties": {
-      "scanId": { "type": "string", "minLength": 1, "maxLength": 36 },
-      "resultId": { "type": "string", "minLength": 1, "maxLength": 36 },
+      "scanId": GUID,
+      "resultId": GUID,
     },
     "required": ["scanId", "resultId"]
   })
@@ -211,6 +218,51 @@ export class ElectricHandlers {
       });
     }));
     return JSON.stringify(tfDataUrls);
+  }
+
+  @jsonSchema({
+    "type": "object",
+    "properties": {
+      "scanId": GUID,
+    },
+    "required": ["scanId"]
+  })
+  static async electric_getEyeball(req: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const scanId = path.basename(JSON.parse(req).scanId);
+      const eyeballPath = path.join(SCANS_DIR, scanId, EYEBALL_FILE);
+      fs.readFile(eyeballPath, {encoding: 'utf8'}, (err, data: string) => {
+        err ? reject(err) : resolve(data);
+      });
+    });
+  }
+
+  @jsonSchema({
+    "type": "object",
+    "properties": {
+      "scanId": GUID,
+      "eyeball": { 
+        "type": "object",
+        "properties": {
+          "custom404": ARRAY_OF_GUIDS,
+          "loginPage": ARRAY_OF_GUIDS,
+          "homePage": ARRAY_OF_GUIDS,
+          "oldLooking": ARRAY_OF_GUIDS,
+        },
+        "additionalItems": false,
+      },
+    },
+    "required": ["scanId", "eyeball"]
+  })
+  static async electric_saveEyeball(req: string): Promise<string> {
+    const saveReq = JSON.parse(req);
+    const scanId = path.basename(saveReq.scanId);
+    const eyeballPath = path.join(SCANS_DIR, scanId, EYEBALL_FILE);
+    const data = JSON.stringify(saveReq.eyeball);
+    fs.writeFile(eyeballPath, data, {mode: 0o600}, (err) => {
+      err ? console.error(err) : null;
+    });
+    return '';
   }
 
 }

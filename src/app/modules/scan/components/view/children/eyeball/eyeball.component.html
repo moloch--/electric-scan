@@ -1,17 +1,17 @@
-<div [@fadeInOut]>
+<div>
 
-  <div *ngIf="!imagesCompleted || eyeballing">
+  <div [@fadeInOut] *ngIf="!imagesCompleted || eyeballing">
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </div>
 
   <div *ngIf="imagesCompleted">
 
-    <div *ngIf="scan && eyeballCompleted" class="results-container">
+    <div [@fadeInOut] *ngIf="scan && eyeballCompleted" class="results-container">
 
-      <h2>{{ LOGIN_PAGE }}</h2>
+      <h2>Login Page</h2>
       <div class="eyeballed-class-container">
         
-        <div *ngFor="let result of classifications.loginPage; let index = index" [attr.data-index]="index">
+        <div *ngFor="let result of resultsOf(classifications.loginPage); let index = index" [attr.data-index]="index">
           <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
             <mat-card-header>
               <mat-card-title>
@@ -32,9 +32,9 @@
         </div>
       </div>
 
-      <h2>{{ OLD_LOOKING }}</h2>
+      <h2>Old Looking</h2>
       <div class="eyeballed-class-container">
-        <div *ngFor="let result of classifications.oldLooking; let index = index" [attr.data-index]="index">
+        <div *ngFor="let result of resultsOf(classifications.oldLooking); let index = index" [attr.data-index]="index">
           <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
             <mat-card-header>
               <mat-card-title>
@@ -55,10 +55,9 @@
         </div>
       </div>
 
-
-      <h2>{{ HOMEPAGE }}</h2>
+      <h2>Homepage</h2>
       <div class="eyeballed-class-container">
-        <div *ngFor="let result of classifications.homePage; let index = index" [attr.data-index]="index">
+        <div *ngFor="let result of resultsOf(classifications.homePage); let index = index" [attr.data-index]="index">
           <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
             <mat-card-header>
               <mat-card-title>
@@ -79,9 +78,9 @@
         </div>
       </div>
 
-      <h2>{{ CUSTOM_404 }}</h2>
+      <h2>Page Not Found</h2>
       <div class="eyeballed-class-container">
-        <div *ngFor="let result of classifications.custom404; let index = index" [attr.data-index]="index">
+        <div *ngFor="let result of resultsOf(classifications.custom404); let index = index" [attr.data-index]="index">
           <mat-card class="result-card" (click)="details(result)" (contextmenu)="onContextMenu($event, result)">
             <mat-card-header>
               <mat-card-title>

@@ -3,18 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import * as tf from '@tensorflow/tfjs';
 
-import { ScannerService, Scan, ScanResult } from '@app/providers/scanner.service';
+import { ScannerService, Scan, ScanResult, Eyeball } from '@app/providers/scanner.service';
 import { ClientService } from '@app/providers/client.service';
 import { FadeInOut } from '@app/shared/animations';
 import { ContextMenuComponent } from '../../view.component';
 
-
-export interface EyeballClassification {
-  custom404: ScanResult[];
-  loginPage: ScanResult[];
-  homePage: ScanResult[];
-  oldLooking: ScanResult[];
-}
 
 @Component({
   selector: 'app-eyeball',
@@ -24,11 +17,6 @@ export interface EyeballClassification {
 })
 export class EyeballComponent extends ContextMenuComponent implements OnInit {
 
-  readonly CUSTOM_404 = 'Custom 404';
-  readonly LOGIN_PAGE = 'Login Page';
-  readonly HOMEPAGE = 'Homepage';
-  readonly OLD_LOOKING = 'Old Looking';
-
   scan: Scan;
   scanResults = new Map<string, ScanResult>();
   images = new Map<string, string>();
@@ -37,7 +25,7 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
   eyeballCompleted = false;
   confidence = 0.6;
 
-  classifications: EyeballClassification = {
+  classifications: Eyeball = {
     custom404: [],
     loginPage: [],
     homePage: [],
@@ -66,6 +54,14 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
     });
   }
 
+  resultsOf(resultIds: string[]): ScanResult[] {
+    const results = [];
+    for (let index = 0; index < resultIds.length; ++index) {
+      results.push(this.scanResults.get(resultIds[index]));
+    }
+    return results;
+  }
+
   async eyeballScan(): Promise<void> {
     console.log('eyeballing ...');
     this.eyeballing = true;
@@ -90,19 +86,19 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
       console.log(`${typeof predictions} - ${predictions}`);
       if (predictions[0] > this.confidence) {
         console.log(`Custom 404: ${key}`);
-        this.classifications.custom404.push(this.scanResults.get(key));
+        this.classifications.custom404.push(key);
       }
       if (predictions[1] > this.confidence) {
         console.log(`Login Page: ${key}`);
-        this.classifications.loginPage.push(this.scanResults.get(key));
+        this.classifications.loginPage.push(key);
       }
       if (predictions[2] > this.confidence) {
         console.log(`Homepage: ${key}`);
-        this.classifications.homePage.push(this.scanResults.get(key));
+        this.classifications.homePage.push(key);
       }
       if (predictions[3] > this.confidence) {
         console.log(`Old Looking: ${key}`);
-        this.classifications.oldLooking.push(this.scanResults.get(key));
+        this.classifications.oldLooking.push(key);
       }
     }
 

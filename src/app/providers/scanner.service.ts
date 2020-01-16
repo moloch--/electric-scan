@@ -22,6 +22,7 @@ import { Subject } from 'rxjs';
 import * as base64 from 'base64-arraybuffer';
 
 import { IPCService } from './ipc.service';
+import { stringify } from 'querystring';
 
 
 export interface ScanResult {
@@ -40,6 +41,14 @@ export interface Scan {
   width: number;
   height: number;
 }
+
+export interface Eyeball {
+  custom404: string[];
+  loginPage: string[];
+  homePage: string[];
+  oldLooking: string[];
+}
+
 
 // Basic LRU Cache to Avoid too much IPC
 class LRUCache<T> {
@@ -77,7 +86,7 @@ export class ScannerService {
 
   private _imageCache = new LRUCache<string>();
   private _scanCache = new LRUCache<Scan>();
-  // private _eyeballCache = new LRUCache<string>();
+  private _eyeballCache = new LRUCache<Eyeball>();
   // private _resemblesCache = new LRUCache<string>();
 
   scans$ = new Subject<Scan>();
@@ -171,7 +180,7 @@ export class ScannerService {
     const resp = await this._ipc.request('electric_tfFiles', '');
     try {
       const tfResp = JSON.parse(resp);
-      console.log(tfResp);
+      // console.log(tfResp);
       const tfDir = new Map();
       for (let key in tfResp) {
         tfDir[key] = tfResp[key];
@@ -182,7 +191,7 @@ export class ScannerService {
         const data = new Blob([new Uint8Array(dataBuf)]);
         tfFiles.push(this.blobToFile(data, fileName));
       }
-      console.log(tfFiles);
+      // console.log(tfFiles);
       return tfFiles;
     } catch (err) {
       console.error('Error loading tf files');
@@ -195,6 +204,35 @@ export class ScannerService {
     blob.lastModifiedDate = new Date();
     blob.name = fileName;
     return <File>blob;
+  }
+
+  async getEyeball(scanId: string): Promise<Eyeball|null> {
+    let eyeball: Eyeball = this._eyeballCache.get(scanId);
+    if (eyeball !== null) {
+      return eyeball;
+    }
+    try {
+      const resp = await this._ipc.request('electric_getEyeball', JSON.stringify({
+        scanId: scanId,
+      }));
+      if (resp) {
+        eyeball = JSON.parse(resp);
+        this._eyeballCache.put(scanId, eyeball);
+        return eyeball;
+      } else {
+        return null;
+      }
+    } catch(err) {
+      console.error(err);
+      return null;
+    }
+  }
+
+  async saveEyeball(scanId: string, eyeball: Eyeball): Promise<void> {
+    await this._ipc.request('electric_saveEyeball', JSON.stringify({
+      scanId: scanId,
+      eyeball: eyeball
+    }));
   }
 
 }
