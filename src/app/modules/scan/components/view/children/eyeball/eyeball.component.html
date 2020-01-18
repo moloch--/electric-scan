@@ -1,8 +1,21 @@
-<div>
+<div [@fadeInOut] *ngIf="scan && !isCompleted" class="not-completed-container">
 
-  <div [@fadeInOut] *ngIf="!imagesCompleted || eyeballing">
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  <div class="not-completed-message">
+    <h1>
+      <i class="fas fa-fw fa-spin fa-spinner"></i>
+      Please wait for scan to complete ...
+    </h1>
   </div>
+
+</div>
+
+<div *ngIf="scan && isCompleted">
+
+  <!-- <div class="loading-container" *ngIf="!imagesCompleted || eyeballing">
+    
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+
+  </div> -->
 
   <div *ngIf="imagesCompleted">
 

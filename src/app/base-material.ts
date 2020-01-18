@@ -22,14 +22,16 @@ import {
   MatButtonModule, MatCheckboxModule, MatOptionModule, MatSelectModule, MatMenuModule, MatTabsModule,
   MatFormFieldModule, MatTooltipModule, MatToolbarModule, MatIconModule, MatProgressSpinnerModule,
   MatDialogModule, MatGridListModule, MatCardModule, MatTableModule, MatSortModule, MatInputModule,
-  MatSnackBarModule, MatSlideToggleModule, MatDividerModule, MatProgressBarModule, MatBadgeModule
+  MatSnackBarModule, MatSlideToggleModule, MatDividerModule, MatProgressBarModule, MatBadgeModule,
+  MatSidenavModule
 } from '@angular/material';
 
 const modules = [
   MatButtonModule, MatCheckboxModule, MatOptionModule, MatSelectModule, MatMenuModule, MatTabsModule,
   MatFormFieldModule, MatTooltipModule, MatToolbarModule, MatIconModule, MatProgressSpinnerModule,
   MatDialogModule, MatGridListModule, MatCardModule, MatTableModule, MatSortModule, MatInputModule,
-  MatSnackBarModule, MatSlideToggleModule, MatDividerModule, MatProgressBarModule, MatBadgeModule
+  MatSnackBarModule, MatSlideToggleModule, MatDividerModule, MatProgressBarModule, MatBadgeModule,
+  MatSidenavModule
 ];
 
 @NgModule({

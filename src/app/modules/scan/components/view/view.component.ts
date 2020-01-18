@@ -28,7 +28,6 @@ export class ViewComponent implements OnInit {
 
   scan: Scan;
   progress: number = 0;
-
   navLinks = [
     { path: 'all', label: 'All' },
     { path: 'eyeball', label: 'Eyeballer' },
@@ -74,7 +73,6 @@ export class ViewComponent implements OnInit {
   saveAllAs() {
     this.clientService.saveAllAs(this.scan.id);
   }
-
 
 }
 

@@ -10,7 +10,7 @@
     "types": [],
   },
   "angularCompilerOptions": {
-    "enableIvy": true
+    // "enableIvy": true
   },
   "exclude": [
     "**/*.spec.ts"

@@ -23,6 +23,7 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
   imagesCompleted = false;
   eyeballing = false;
   eyeballCompleted = false;
+  isCompleted = false;
   confidence = 0.6;
 
   classifications: Eyeball = {
@@ -42,19 +43,22 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
   ngOnInit() {
     this._route.parent.params.subscribe(async (params) => {
       this.scan = await this._scannerService.getScan(params['scan-id']);
-      const eyeball = await this._scannerService.getEyeball(this.scan.id);
-      if (eyeball !== null) {
-        this.classifications = eyeball;
-        this.eyeballCompleted = true;
-        this.loadAllImages();
-      } else {
-        await this.loadAllImages();
-        this.eyeballScan();
+      this.isCompleted = this.scan.duration !== -1 ? true : false;
+      if (this.isCompleted) {
+        const eyeball = await this._scannerService.getEyeball(this.scan.id);
+        if (eyeball !== null) {
+          this.classifications = eyeball;
+          this.eyeballCompleted = true;
+          this.loadAllImages();
+        } else {
+          await this.loadAllImages();
+          this.eyeballScan();
+        }
       }
     });
   }
 
-  async loadAllImages() {
+  async loadAllImages(): Promise<void> {
     await Promise.all(this.scan.results
       .filter((result: ScanResult) => result.error === '')
       .map(async (result: ScanResult) => {
@@ -83,10 +87,8 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
     for (let index = 0; index < keys.length; ++index) {
       const key = keys[index];
       console.log(`classifying: ${key}`);
-      const img = new Image();
+      const img = new Image(this.scan.width, this.scan.height);
       img.src = this.images.get(key);
-      img.height = this.scan.height;
-      img.width = this.scan.width;
       const tensor = tf.browser.fromPixels(img)
         .resizeNearestNeighbor([224, 224])
         .toFloat()
@@ -94,7 +96,7 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
         .div(offset)
         .expandDims();
       const predictions = (<tf.Tensor<tf.Rank>> model.predict(tensor)).dataSync();
-      console.log(`${typeof predictions} - ${predictions}`);
+      console.log(`${predictions}`);
       if (predictions[0] > this.confidence) {
         console.log(`Custom 404: ${key}`);
         this.classifications.custom404.push(key);

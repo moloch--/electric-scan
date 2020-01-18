@@ -1,10 +1,22 @@
+.not-completed-container {
+    display: grid;
+    justify-items: center;
+    align-items: center;
+    
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.not-completed-message {
+    grid-column: 2/3;
+    grid-row: 2/3;
+}
+
 .results-container {
     display: grid;
     justify-items: center;
     align-items: center;
     
     grid-template-columns: 1fr;
-
 }
 
 .eyeballed-class-container {

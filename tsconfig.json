@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@app/*": ["./src/app/*"],
-      "@rpc/*": ["./rpc/*"]
+      "@ipc/*": ["./ipc/*"]
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,

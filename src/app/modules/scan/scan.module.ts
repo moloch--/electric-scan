@@ -10,7 +10,7 @@ import { BaseMaterialModule } from '@app/base-material';
 import { NewComponent } from './components/new/new.component';
 import { HistoryComponent } from './components/history/history.component';
 import { 
-  ViewComponent, DetailsDialogComponent, OpenUrlDialogComponent
+  ViewComponent, DetailsDialogComponent, OpenUrlDialogComponent, ContextMenuComponent
 } from './components/view/view.component';
 import { UrlTitlePipe, DatePipe, DataUrlPipe } from './scan.pipes';
 import { EyeballComponent } from './components/view/children/eyeball/eyeball.component';
@@ -25,10 +25,11 @@ import { AllComponent } from './components/view/children/all/all.component';
     ViewComponent, 
     DetailsDialogComponent,
     OpenUrlDialogComponent,
+    ContextMenuComponent,
     EyeballComponent,
     ResemblesComponent,
     AllComponent,
-
+    
     UrlTitlePipe,
     DatePipe,
     DataUrlPipe,
