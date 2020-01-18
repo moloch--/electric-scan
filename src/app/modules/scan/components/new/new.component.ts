@@ -42,18 +42,28 @@ export class NewComponent implements OnInit {
       ])],
       workers: ['8', Validators.compose([
         Validators.required,
+        Validators.min(1),
+        Validators.max(64),
       ])],
       width: ['1920', Validators.compose([
         Validators.required,
+        Validators.min(1),
+        Validators.max(7680),
       ])],
       height: ['1080', Validators.compose([
         Validators.required,
+        Validators.min(1),
+        Validators.max(4320),
       ])],
       timeout: ['15', Validators.compose([
         Validators.required,
+        Validators.min(1),
+        Validators.max(999999999),    
       ])],
       margin: ['50', Validators.compose([
         Validators.required,
+        Validators.min(0),
+        Validators.max(999999999),
       ])],
     });
 
@@ -73,8 +83,13 @@ export class NewComponent implements OnInit {
     const timeout = Number(this.startScanForm.controls['timeout'].value) * 1000;
     const margin = Number(this.startScanForm.controls['margin'].value);
     const targets = await this.parseTargets(this.startScanForm.controls['targets'].value);
-    const scan = await this._scannerService.startScan(name, targets, workers, width, height, timeout, margin);
-    this._router.navigate(['/scan', 'view', scan['id']]);
+    if (0 < targets.length) {
+      const scan = await this._scannerService.startScan(name, targets, workers, width, height, timeout, margin);
+      this._router.navigate(['/scan', 'view', scan['id']]);
+    } else {
+      this.starting = false;
+      this._snackBar.open('No valid targets', 'Dismiss');
+    }
   }
   
   async parseTargets(rawTargets: string): Promise<string[]> {
@@ -83,6 +98,7 @@ export class NewComponent implements OnInit {
       this.worker.onmessage = ({ data }) => {
         this.countingTargets = false;
         resolve((<string[]> data.targets));
+        console.log(data);
         if (data.errors.length) {
           this._snackBar.open(data.errors[0].message, 'Dismiss');
         }

@@ -3,6 +3,7 @@
 import * as IPCIDR from 'ip-cidr';
 
 const MIN_MASK = 15;
+const MAX_MASK = 32;
 
 function unique(targets: string[]): string[] {
   return targets.filter((elem, index, self) => {
@@ -41,13 +42,14 @@ addEventListener('message', ({ data }) => {
         let ips: string[] = cidr.toArray();
         ips = ips.map((ip) => {
           targetUri.hostname = ip;
+          targetUri.pathname = '/';
           return targetUri.toString();
         });
         allTargets = allTargets.concat(ips);
       } else if (mask && mask <= MIN_MASK) {
         errors.push(new Error(`Network mask /${mask} is too large`));
-      } else {
-        errors.push(new Error(`Invalid network mask`))
+      } else if (mask && MAX_MASK < mask) {
+        errors.push(new Error(`Invalid network mask ${mask}`));
       }
     } else {
       allTargets.push(targets[index]);
