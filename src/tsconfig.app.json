@@ -13,6 +13,7 @@
     // "enableIvy": true
   },
   "exclude": [
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "**/*.worker.ts"
   ]
 }
