@@ -19,54 +19,31 @@
 
 import { BrowserWindow, NativeImage, Session } from 'electron';
 import { BehaviorSubject } from 'rxjs';
+import { Worker } from 'worker_threads';
+import { TASK_REQ, TASK_RESULT, WorkerMsg, Scan, ScanResult, Screenshot } from './scan-worker';
 import * as uuid from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as writeFileAtomic from 'write-file-atomic';
 
 
-// Screenshot data + metadata
-interface Screenshot {
-  target: string;
-  image: NativeImage|null;
-  error: string;
-}
-
-// Result for a single target, but no image data
-export interface ScanResult {
-  id: string;
-  target: string;
-  error: string;
-}
-
-// Results for the entire scan
-export interface Scan {
-  id: string;
-  name: string;
-  results: ScanResult[];
-  started: number;
-  duration: number;
-  width: number;
-  height: number;
-}
-
 export interface ScannerSettings {
-    /* Browser Settings */
-    UserAgent: string;
-    DisableTLSValidation: boolean;
-  
-    /* Proxy Settings */
-    SOCKSProxyEnabled: boolean;
-    SOCKSProxyHostname: string;
-    SOCKSProxyPort: number;
-  
-    HTTPProxyEnabled: boolean;
-    HTTPProxyHostname: string;
-    HTTPProxyPort: number;
-  
-    HTTPSProxyEnabled: boolean;
-    HTTPSProxyHostname: string;
-    HTTPSProxyPort: number;
+  /* Browser Settings */
+  UserAgent: string;
+  DisableTLSValidation: boolean;
+
+  /* Proxy Settings */
+  SOCKSProxyEnabled: boolean;
+  SOCKSProxyHostname: string;
+  SOCKSProxyPort: number;
+
+  HTTPProxyEnabled: boolean;
+  HTTPProxyHostname: string;
+  HTTPProxyPort: number;
+
+  HTTPSProxyEnabled: boolean;
+  HTTPSProxyHostname: string;
+  HTTPSProxyPort: number;
 }
 
 export class ElectricScanner {
@@ -81,14 +58,7 @@ export class ElectricScanner {
   private _scanDir: string;
   private _started: Date;
 
-  constructor(private settings: ScannerSettings, private maxNumOfWorkers = 8) { }
-
-  private unique(targets: string[]): string[] {
-    targets = targets.map(t => t.trim()).filter(t => t.length);
-    return targets.filter((elem, index, self) => {
-      return index === self.indexOf(elem);
-    });
-  }
+  constructor(public settings: ScannerSettings, private maxNumOfWorkers = 8) { }
 
   async start(parentDir: string, name: string, targets: string[]): Promise<BehaviorSubject<Scan>> {
     const tasks = this.unique(targets);
@@ -106,14 +76,14 @@ export class ElectricScanner {
     console.log(`Max number of workers: ${this.maxNumOfWorkers}`);
     this._scanDir = path.join(parentDir, this.scan.id);
     if (!fs.existsSync(this._scanDir)) {
-      fs.mkdirSync(this._scanDir, {mode: 0o700, recursive: true});
+      fs.mkdirSync(this._scanDir, { mode: 0o700, recursive: true });
       console.log(`Created scan directory: ${this._scanDir}`);
     }
     this.scan$ = new BehaviorSubject(this.scan);
     await this.saveMetadata();
     setImmediate(async () => {
       console.log(`Scanning ${tasks.length} target(s) ...`);
-      await this.executeQueue(tasks);
+      await this.execute(tasks);
       this.scan.duration = new Date().getTime() - this._started.getTime();
       console.log(`Scan completed: ${this.scan.duration}`);
       await this.saveMetadata();
@@ -122,14 +92,63 @@ export class ElectricScanner {
     return this.scan$;
   }
 
-  private async saveMetadata(): Promise<void|NodeJS.ErrnoException> {
+  private async saveMetadata(): Promise<void | NodeJS.ErrnoException> {
     return new Promise((resolve, reject) => {
       const metaPath = path.join(this._scanDir, 'metadata.json');
       const data = JSON.stringify(this.scan);
-      writeFileAtomic(metaPath, data, {mode: 0o600}, (err: NodeJS.ErrnoException) => {
+      writeFileAtomic(metaPath, data, { mode: 0o600 }, (err: NodeJS.ErrnoException) => {
         err ? reject(err) : resolve();
         this.scan$.next(this.scan);
       });
+    });
+  }
+
+  private async execute(targets: string[]): Promise<void> {
+    return new Promise((resolve) => {
+
+      const workers: Worker[] = new Array(this.maxNumOfWorkers);
+      const msgHandler = async (msg: WorkerMsg) => {
+        if (msg.type === TASK_REQ) {
+          if (workers[msg.workerId] !== undefined) {
+            const worker = workers[msg.workerId];
+            if (0 < targets.length) {
+              const task = targets.pop();
+              worker.postMessage({ target: task });
+            } else {
+              console.log(`No more targets, killing worker ${msg.workerId}`);
+              worker.on('exit', () => {
+                workers[msg.workerId] = null;
+                if (!workers.some(worker => worker !== null)) {
+                  console.log('All targets have completed');
+                  resolve();
+                }
+              });
+              worker.terminate();
+            }
+          } else {
+            console.log(`Worker thread '${msg.workerId}' is undefined`);
+          }
+        } else if (msg.type === TASK_RESULT) {
+          console.log(`Got result for '${msg.target}'`);
+        }
+      };
+
+      /* Start worker threads */
+      for (let workerId = 0; workerId < this.maxNumOfWorkers; ++workerId) {
+        console.log(`Starting worker thread ${workerId + 1} of ${this.maxNumOfWorkers}`);
+        workers[workerId] = new Worker(path.join(__dirname, 'scan-worker.js'), {
+          workerData: {
+            id: workerId,
+            height: this.height,
+            width: this.width,
+            timeout: this.timeout,
+            margin: this.margin,
+            settings: this.settings,
+          }
+        });
+        workers[workerId].on('message', msgHandler);
+      }
+
     });
   }
 
@@ -145,12 +164,12 @@ export class ElectricScanner {
         if (screenshot.image) {
           const filePNG = path.join(this._scanDir, `${resultId}.png`);
           const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
-          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: null}, (err: Error) => {
+          fs.writeFile(filePNG, imageData, { mode: 0o600, encoding: null }, (err: Error) => {
             err ? console.error(err) : null;
           });
           const fileData = path.join(this._scanDir, `${resultId}.data`);
           const dataUrl = screenshot.image ? screenshot.image.toDataURL() : '';
-          fs.writeFile(fileData, dataUrl, {mode: 0o600, encoding: 'utf8'}, (err: Error) => {
+          fs.writeFile(fileData, dataUrl, { mode: 0o600, encoding: 'utf8' }, (err: Error) => {
             err ? console.error(err) : null;
           });
         }
@@ -168,7 +187,7 @@ export class ElectricScanner {
         console.log(`Task ${taskIndex} of ${tasks.length} - Workers: ${numOfWorkers} (Max: ${this.maxNumOfWorkers})`);
         if (numOfWorkers < this.maxNumOfWorkers && taskIndex < tasks.length) {
           const index = taskIndex;
-          this.capture(tasks[index]).then((result) => { 
+          this.capture(tasks[index]).then((result) => {
             handleResult(index, result); // Success
           }).catch((result) => {
             handleResult(index, result); // Failure
@@ -199,7 +218,7 @@ export class ElectricScanner {
     scanWindow.on('closed', () => {
       scanWindow = null;
     });
-    
+
     let result: Screenshot;
     try {
       const image = await this.screenshot(scanWindow, targetURL);
@@ -233,7 +252,7 @@ export class ElectricScanner {
           try {
             const image = await scanWindow.capturePage();
             resolve(image);
-          } catch(err) {
+          } catch (err) {
             reject(err);
           }
         }, this.margin);
@@ -271,7 +290,7 @@ export class ElectricScanner {
   }
 
   private async configureSession(session: Session): Promise<void> {
-    
+
     // User-agent
     if (this.settings.UserAgent && this.settings.UserAgent.length) {
       session.setUserAgent(this.settings.UserAgent);
@@ -313,6 +332,13 @@ export class ElectricScanner {
       console.log(`[proxy rules] ${rules}`);
     }
     return rules;
+  }
+
+  private unique(targets: string[]): string[] {
+    targets = targets.map(t => t.trim()).filter(t => t.length);
+    return targets.filter((elem, index, self) => {
+      return index === self.indexOf(elem);
+    });
   }
 
 }
