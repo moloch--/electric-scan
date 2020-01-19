@@ -140,18 +140,17 @@ export class ElectricScanner {
     return new Promise((complete) => {
 
       const handleResult = async (index: number, screenshot: Screenshot) => {
-        console.log(`handleResult() for ${index}`);
+        console.log(`handleResult() for ${index} - ${screenshot.target}`);
         const resultId = uuid().toString();
         if (screenshot.image) {
           const filePNG = path.join(this._scanDir, `${resultId}.png`);
           const imageData = screenshot.image ? screenshot.image.toPNG() : Buffer.from('');
-          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: null}, (err: NodeJS.ErrnoException) => {
+          fs.writeFile(filePNG, imageData, {mode: 0o600, encoding: null}, (err: Error) => {
             err ? console.error(err) : null;
           });
-
           const fileData = path.join(this._scanDir, `${resultId}.data`);
           const dataUrl = screenshot.image ? screenshot.image.toDataURL() : '';
-          fs.writeFile(fileData, dataUrl, {mode: 0o600, encoding: 'utf8'}, (err: NodeJS.ErrnoException) => {
+          fs.writeFile(fileData, dataUrl, {mode: 0o600, encoding: 'utf8'}, (err: Error) => {
             err ? console.error(err) : null;
           });
         }

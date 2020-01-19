@@ -17,6 +17,7 @@ import { ContextMenuComponent } from '../../view.component';
 })
 export class EyeballComponent extends ContextMenuComponent implements OnInit {
 
+  offset = tf.scalar(127.5);
   scan: Scan;
   scanResults = new Map<string, ScanResult>();
   images = new Map<string, string>();
@@ -82,41 +83,42 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
     this.eyeballing = true;
     const tfFiles = await this._scannerService.tfFiles();
     const model = await tf.loadLayersModel(tf.io.browserFiles(tfFiles));
-    const offset = tf.scalar(127.5);
     const keys = Array.from(this.images.keys());
-    for (let index = 0; index < keys.length; ++index) {
-      const key = keys[index];
-      console.log(`classifying: ${key}`);
-      const img = new Image(this.scan.width, this.scan.height);
-      img.src = this.images.get(key);
-      const tensor = tf.browser.fromPixels(img)
-        .resizeNearestNeighbor([224, 224])
-        .toFloat()
-        .sub(offset)
-        .div(offset)
-        .expandDims();
-      const predictions = (<tf.Tensor<tf.Rank>> model.predict(tensor)).dataSync();
-      console.log(`${predictions}`);
-      if (predictions[0] > this.confidence) {
-        console.log(`Custom 404: ${key}`);
-        this.classifications.custom404.push(key);
-      }
-      if (predictions[1] > this.confidence) {
-        console.log(`Login Page: ${key}`);
-        this.classifications.loginPage.push(key);
-      }
-      if (predictions[2] > this.confidence) {
-        console.log(`Homepage: ${key}`);
-        this.classifications.homePage.push(key);
-      }
-      if (predictions[3] > this.confidence) {
-        console.log(`Old Looking: ${key}`);
-        this.classifications.oldLooking.push(key);
-      }
-    }
+    await Promise.all(keys.map((key) => {
+      this.classifyImage(key, model);
+    }));
     this.eyeballing = false;
     this.eyeballCompleted = true;
     this._scannerService.saveEyeball(this.scan.id, this.classifications);
   }
 
+  async classifyImage(key: string, model: tf.LayersModel) {
+    console.log(`classifying: ${key}`);
+    const img = new Image(this.scan.width, this.scan.height);
+    img.src = this.images.get(key);
+    const tensor = tf.browser.fromPixels(img)
+      .resizeNearestNeighbor([224, 224])
+      .toFloat()
+      .sub(this.offset)
+      .div(this.offset)
+      .expandDims();
+    const predictions = (<tf.Tensor<tf.Rank>> model.predict(tensor)).dataSync();
+    console.log(`${predictions}`);
+    if (predictions[0] > this.confidence) {
+      console.log(`Custom 404: ${key}`);
+      this.classifications.custom404.push(key);
+    }
+    if (predictions[1] > this.confidence) {
+      console.log(`Login Page: ${key}`);
+      this.classifications.loginPage.push(key);
+    }
+    if (predictions[2] > this.confidence) {
+      console.log(`Homepage: ${key}`);
+      this.classifications.homePage.push(key);
+    }
+    if (predictions[3] > this.confidence) {
+      console.log(`Old Looking: ${key}`);
+      this.classifications.oldLooking.push(key);
+    }
+  }
 }
