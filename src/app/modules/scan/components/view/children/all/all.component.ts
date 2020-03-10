@@ -72,11 +72,15 @@ export class AllComponent extends ContextMenuComponent implements OnInit {
     this.updateDisplayResults();
   }
 
+  saveAllAs() {
+    this.clientService.saveAllAs(this.scan.id);
+  }
+
   updateDisplayResults() {
     if (!this.scan) {
       return [];
     }
-    let completed = this.scan.results.filter(r => r !== null);
+    let completed = this.scan.results.filter(res => res !== null);
     if (this.hideErrors) {
       completed = completed.filter(res => res.error === '');
     }
