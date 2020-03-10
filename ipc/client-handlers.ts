@@ -17,7 +17,7 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import { dialog, nativeTheme } from 'electron';
+import { dialog, nativeTheme, SaveDialogOptions } from 'electron';
 import { homedir } from 'os';
 import { shell } from 'electron';
 import * as fs from 'fs';
@@ -99,14 +99,11 @@ export class ClientHandlers {
       const resultId = path.basename(saveImageReq.resultId);
       const src = path.join(SCANS_DIR, scanId, `${resultId}.png`);
       if (fs.existsSync(src)) {
-        const dialogOptions = {
+        const dialogOptions: SaveDialogOptions = {
           title: 'Save Image As ...',
           message: 'Save screenshot file',
           defaultPath: path.join(homedir(), 'Desktop', 'Untitled.png'),
-          properties: {
-            openFile: true,
-            createDirectory: true,
-          }
+          properties: ['createDirectory', 'showHiddenFiles', 'showOverwriteConfirmation']
         };
         const dst = await dialog.showSaveDialog(dialogOptions);
         if (!dst.canceled) {
@@ -133,14 +130,11 @@ export class ClientHandlers {
       const scanId = path.basename(saveAllReq.scanId);
       const srcDir = path.join(SCANS_DIR, scanId);
       if (fs.existsSync(srcDir)) {
-        const dialogOptions = {
+        const dialogOptions: SaveDialogOptions = {
           title: 'Save All As ...',
           message: 'Save all screenshots',
           defaultPath: path.join(homedir(), 'Desktop'),
-          properties: {
-            openDirectory: true,
-            createDirectory: true,
-          }
+          properties: ['createDirectory', 'showHiddenFiles', 'showOverwriteConfirmation']
         };
         const dstDir = await dialog.showSaveDialog(dialogOptions);
         if (!dstDir.canceled) {
