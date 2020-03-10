@@ -31,7 +31,7 @@ export class ViewComponent implements OnInit {
   navLinks = [
     { path: 'all', label: 'All' },
     { path: 'eyeball', label: 'Eyeballer' },
-    { path: 'resembles', label: 'Resembles' },
+    // { path: 'resembles', label: 'Resembles' },
   ];
 
   private _scanSub: Subscription;
