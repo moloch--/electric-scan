@@ -9,13 +9,15 @@
 
 </div>
 
-<div *ngIf="scan && isCompleted">
+<div *ngIf="scan && isCompleted" class="results-container">
+  <br />
+  <br />
+  <div class="loading-container" *ngIf="!imagesCompleted || eyeballing">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div> 
+</div>
 
-  <!-- <div class="loading-container" *ngIf="!imagesCompleted || eyeballing">
-    
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-
-  </div> -->
+<div *ngIf="scan && isCompleted && !eyeballing">
 
   <div *ngIf="imagesCompleted">
 

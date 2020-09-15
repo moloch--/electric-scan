@@ -92,5 +92,8 @@
       "check-separator",
       "check-type"
     ]
-  }
+  },
+  "extends": [
+    "@angular-extensions/lint-rules"
+  ]
 }

@@ -206,6 +206,7 @@ export class ElectricHandlers {
 
   static async electric_tfFiles(_: string): Promise<string> {
     const tfDir = path.join(__dirname, 'tf');
+    console.log(`Loading TF files from: ${tfDir} ...`);
     const tfFileNames = await ClientHandlers.lsDir(tfDir);
     const tfDataUrls = {};
     await Promise.all(tfFileNames.map((fn) => {
@@ -217,6 +218,7 @@ export class ElectricHandlers {
         });
       });
     }));
+    // console.log(tfDataUrls);
     return JSON.stringify(tfDataUrls);
   }
 

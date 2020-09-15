@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.900.5",
+    "@angular-extensions/lint-rules": "^1.1.1",
     "@angular/cli": "9.0.5",
     "@angular/common": "9.0.5",
     "@angular/compiler": "9.0.5",
