@@ -84,7 +84,7 @@ export class ViewComponent implements OnInit {
 })
 export class ContextMenuComponent implements Dialogs {
 
-  scan: Scan;
+  
   @ViewChild(MatMenuTrigger, { static: false }) contextMenu: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
 
@@ -100,6 +100,10 @@ export class ContextMenuComponent implements Dialogs {
         parent: this,
       }
     });
+  }
+
+  get scan(): Scan {
+    return null;
   }
 
   saveAs(result: ScanResult) {

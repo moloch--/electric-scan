@@ -38,5 +38,5 @@ const routes: Routes = [
 
 ];
 
-export const ScanModuleRouting: ModuleWithProviders = RouterModule.forChild(routes);
+export const ScanModuleRouting: ModuleWithProviders<any> = RouterModule.forChild(routes);
 

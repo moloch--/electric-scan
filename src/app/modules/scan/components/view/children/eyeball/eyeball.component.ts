@@ -18,7 +18,7 @@ import { ContextMenuComponent } from '../../view.component';
 export class EyeballComponent extends ContextMenuComponent implements OnInit {
 
   offset = tf.scalar(127.5);
-  scan: Scan;
+  _scan: Scan;
   scanResults = new Map<string, ScanResult>();
   images = new Map<string, string>();
   imagesCompleted = false;
@@ -57,6 +57,14 @@ export class EyeballComponent extends ContextMenuComponent implements OnInit {
         }
       }
     });
+  }
+
+  get scan(): Scan {
+    return this._scan;
+  }
+
+  set scan(scan: Scan) {
+    this._scan = scan;
   }
 
   async loadAllImages(): Promise<void> {
