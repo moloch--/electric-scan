@@ -23,8 +23,7 @@
     ]
   },
   "include": [
-    "main.ts",
-    "src/**/*"
+    "src/main.ts"
   ],
   "exclude": [
     "node_modules"
