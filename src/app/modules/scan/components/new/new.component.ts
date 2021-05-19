@@ -30,7 +30,7 @@ export class NewComponent implements OnInit {
 
   ngOnInit() {
 
-    this.worker = new Worker(new URL('./parsetargets.worker', import.meta.url), { type: 'module' });
+    this.worker = new Worker(new URL('./parsetargets.worker'), { type: 'module' });
 
     const defaultName = `${new Date().toLocaleString("en-US")}`;
     this.startScanForm = this._fb.group({

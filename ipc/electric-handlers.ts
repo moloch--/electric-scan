@@ -214,7 +214,7 @@ export class ElectricHandlers {
         const tfFile = path.join(tfDir, fn);
         fs.readFile(tfFile, {encoding: null}, (_, data: Buffer) => {
           tfDataUrls[path.basename(tfFile)] = base64.encode(data.buffer);
-          resolve();
+          resolve(null);
         });
       });
     }));

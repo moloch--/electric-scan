@@ -177,7 +177,7 @@ export class ElectricScanner {
           numOfWorkers++;
           getNextTask();
         } else if (numOfWorkers === 0 && taskIndex === tasks.length) {
-          complete();
+          complete(null);
         }
       };
 

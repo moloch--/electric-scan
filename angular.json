@@ -31,7 +31,6 @@
             ],
             "scripts": [],
             "webWorkerTsConfig": "tsconfig.worker.json",
-            "aot": false,
             "vendorChunk": true,
             "extractLicenses": false,
             "buildOptimizer": false,
@@ -43,7 +42,6 @@
             "dev": {
               "outputHashing": "all",
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "fileReplacements": [
@@ -58,7 +56,6 @@
               "outputHashing": "all",
               "sourceMap": false,
               "namedChunks": false,
-              "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
