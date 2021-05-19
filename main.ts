@@ -20,6 +20,7 @@
 import { app, BrowserWindow, screen, protocol } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as contextMenu from 'electron-context-menu';
 
 import { startIPCHandlers, SCANS_DIR } from './ipc';
 import * as AppProtocol from './app-protocol';
@@ -73,6 +74,10 @@ async function createMainWindow() {
 
 try {
 
+  contextMenu({
+    prepend: (defaultActions, params, browserWindow) => [],
+  });
+  
   if (!fs.existsSync(SCANS_DIR)) {
     fs.mkdirSync(SCANS_DIR, {recursive: true, mode: 0o700});
   }
