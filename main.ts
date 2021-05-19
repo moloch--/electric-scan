@@ -22,7 +22,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as contextMenu from 'electron-context-menu';
 
-import { startIPCHandlers, SCANS_DIR } from './ipc';
+import { startIPCHandlers, SCANS_DIR } from './main/ipc';
 import * as AppProtocol from './app-protocol';
 
 
@@ -92,7 +92,11 @@ try {
 
   protocol.registerSchemesAsPrivileged([{
     scheme: AppProtocol.scheme,
-    privileges: { standard: true, secure: true }
+    privileges: { 
+      standard: true,
+      secure: true,
+      supportFetchAPI: true
+    }
   }]);
 
   app.on('window-all-closed', () => {

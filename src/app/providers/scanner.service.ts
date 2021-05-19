@@ -90,6 +90,7 @@ export class ScannerService {
   // private _resemblesCache = new LRUCache<string>();
 
   scans$ = new Subject<Scan>();
+  private _tfFiles: File[] = [];
 
   constructor(private _ipc: IPCService) { 
     this._ipc.ipcPush$.subscribe((scan: Scan) => {
@@ -177,34 +178,33 @@ export class ScannerService {
     }
   }
 
-  async tfFiles(): Promise<File[]> {
-    const resp = await this._ipc.request('electric_tfFiles', '');
+  async tfFiles(noCache: Boolean = false): Promise<File[]> {
     try {
-      const tfResp = JSON.parse(resp);
-      // console.log(tfResp);
-      const tfDir = new Map();
-      for (let key in tfResp) {
-        tfDir[key] = tfResp[key];
+      if (this._tfFiles.length < 1 || noCache) {
+        this._tfFiles = [];
+        let resp = await fetch('/assets/tf/model.json');
+        const manifest = await resp.json();
+        const modelPaths: string[] = Array.from(manifest.weightsManifest[0].paths);
+        resp = await fetch('/assets/tf/model.json');
+        const blob = await resp.blob();
+        this._tfFiles.push(new File([blob], 'model.json'));
+        await Promise.all(modelPaths.map(async (modelPath: string) => {
+          const tfFile = await this.fetchTfFile(modelPath);
+          this._tfFiles.push(tfFile);
+        }));
       }
-      const tfFiles: File[] = [];
-      for (let fileName in tfDir) {
-        const dataBuf = base64.decode(tfDir[fileName]);
-        const data = new Blob([new Uint8Array(dataBuf)]);
-        tfFiles.push(this.blobToFile(data, fileName));
-      }
-      // console.log(tfFiles);
-      return tfFiles;
+      return this._tfFiles;
     } catch (err) {
       console.error('Error loading tf files');
       console.error(err);
     }
   }
 
-  private blobToFile(data: Blob, fileName: string): File {
-    var blob: any = data;
-    blob.lastModifiedDate = new Date();
-    blob.name = fileName;
-    return <File>blob;
+  private async fetchTfFile(name: string): Promise<File> {
+    const base = name.split('/').reverse()[0];
+    const resp = await fetch(`/assets/tf/${base}`);
+    const blob = await resp.blob();
+    return new File([blob], base);
   }
 
   async getEyeball(scanId: string): Promise<Eyeball|null> {

@@ -45,7 +45,8 @@ const mimeTypes = {
   '.map': 'text/plain',
   '.woff': 'application/x-font-woff',
   '.woff2': 'font/woff2',
-  '.ttf': 'font/truetype'
+  '.ttf': 'font/truetype',
+  '.bin': 'application/octet-stream'
 };
 
 function charset(mimeType: string): string {
@@ -61,6 +62,16 @@ export function requestHandler(req: Electron.ProtocolRequest, next: ProtocolCall
 
   const reqUrl = new URL(req.url);
   console.log(`[req] ${reqUrl.toString()}`);
+
+  if (!reqUrl.pathname.startsWith('/')) {
+    console.error(`[req-err] Request path must start with a '/'`);
+    return next({
+      mimeType: null,
+      charset: null,
+      data: null,
+    });
+  }
+
   let reqPath = path.normalize(reqUrl.pathname);
   if (reqPath === '/') {
     reqPath = '/index.html';
@@ -76,6 +87,11 @@ export function requestHandler(req: Electron.ProtocolRequest, next: ProtocolCall
       });
     } else {
       console.error(`[req-err] ${err}`);
+      next({
+        mimeType: null,
+        charset: null,
+        data: null,
+      });
     }
   });
 }

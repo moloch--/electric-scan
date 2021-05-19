@@ -204,24 +204,6 @@ export class ElectricHandlers {
     }
   }
 
-  static async electric_tfFiles(_: string): Promise<string> {
-    const tfDir = path.join(__dirname, 'tf');
-    console.log(`Loading TF files from: ${tfDir} ...`);
-    const tfFileNames = await ClientHandlers.lsDir(tfDir);
-    const tfDataUrls = {};
-    await Promise.all(tfFileNames.map((fn) => {
-      return new Promise((resolve) => {
-        const tfFile = path.join(tfDir, fn);
-        fs.readFile(tfFile, {encoding: null}, (_, data: Buffer) => {
-          tfDataUrls[path.basename(tfFile)] = base64.encode(data.buffer);
-          resolve(null);
-        });
-      });
-    }));
-    // console.log(tfDataUrls);
-    return JSON.stringify(tfDataUrls);
-  }
-
   @jsonSchema({
     "type": "object",
     "properties": {
