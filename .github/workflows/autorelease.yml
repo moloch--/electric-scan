@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+    branches: ["master"]
+
+jobs:
+
+  macos-build:
+    runs-on: macos-latest
+    if: startsWith( github.ref, 'refs/tags/v')
+
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: NPM Install
+      run: |
+        npm install -g electron-packager
+        npm install -g @angular/cli
+        npm install -g ngx-i18nsupport
+        npm install
+
+    - run: npm run publish:mac
+
+
+  linux-build:
+
+    runs-on: ubuntu-latest
+    if: startsWith( github.ref, 'refs/tags/v')
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: NPM Install
+      run: |
+        npm install -g electron-packager
+        npm install -g @angular/cli
+        npm install -g ngx-i18nsupport
+        npm install
+
+    - run: npm run publish:linux
+
+  windows-build:
+
+    runs-on: windows-latest
+    if: startsWith( github.ref, 'refs/tags/v')
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: NPM Install
+      run: |
+        npm install -g electron-packager
+        npm install -g @angular/cli
+        npm install -g ngx-i18nsupport
+        npm install
+
+    - run: npm run publish:windows

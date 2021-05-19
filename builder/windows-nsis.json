@@ -1,6 +1,6 @@
 {
-  "productName": "electric-scan",
-
+  "productName": "ElectricScan",
+  "artifactName": "${productName}_${version}_${os}.${ext}",
   "directories": {
     "output": "release/"
   },
@@ -8,9 +8,7 @@
       "**/*",
       "!**/*.ts",
       "!*.code-workspace",
-      "!README.md",
-      "!BUILD.md",
-      "!browserlist",
+      "!LICENSE.md",
       "!package.json",
       "!package-lock.json",
       "!src/",
@@ -23,21 +21,18 @@
       "!tslint.json"
   ],
   "win": {
-    "icon": "dist",
+    "icon": "dist/en",
     "target": [
-      "portable"
-    ]
-  },
-  "mac": {
-    "icon": "dist",
-    "target": [
-      "dmg"
-    ]
-  },
-  "linux": {
-    "icon": "dist",
-    "target": [
-      "deb"
-    ]
+      {
+        "target": "nsis",
+        "arch": "x64"
+      }
+    ],
+    "publish": [{
+      "provider": "github",
+      "owner": "moloch--",
+      "repo": "electric-scan",
+      "private": false
+    }]
   }
 }

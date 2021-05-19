@@ -12,14 +12,17 @@
   "main": "main.js",
   "private": true,
   "scripts": {
-    "build": "npm run electron:serve-tsc && ng build",
+    "build": "npm run electron:main-tsc && ng build",
     "build:dev": "npm run build -- -c dev",
     "build:prod": "npm run build -- -c production",
-    "electron:serve-tsc": "tsc -p tsconfig-serve.json",
+    "electron:main-tsc": "tsc -p tsconfig-main.json",
     "electron:local": "npm run build:dev && electron .",
-    "electron:linux": "npm run build:prod && electron-builder build --linux",
-    "electron:windows": "npm run build:prod && electron-builder build --windows",
-    "electron:mac": "npm run build:prod && electron-builder build --mac",
+    "electron:linux": "npm run build:prod && electron-builder build --config ./builder/linux.json --linux --publish=never",
+    "electron:windows": "npm run build:prod && electron-builder build --config ./builder/windows-exe.json --windows --publish=never",
+    "electron:mac": "npm run build:prod && electron-builder build --config ./builder/macos-x64.json --mac --publish=never",
+    "publish:mac": "npm run build:prod && electron-builder build --config ./builder/macos-x64.json --mac --publish=always && electron-builder build --config ./builder/macos-arm64.json --mac --publish=always",
+    "publish:windows": "npm run build:prod && electron-builder build --config ./builder/windows-exe.json --windows --publish=always && electron-builder build --config ./builder/windows-nsis.json --windows --publish=always",
+    "publish:linux": "npm run build:prod && electron-builder build --config ./builder/linux.json --linux --publish=always",
     "test": "ng test"
   },
   "devDependencies": {
