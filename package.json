@@ -47,7 +47,7 @@
     "@types/webgl2": "0.0.5",
     "chai": "4.2.0",
     "core-js": "3.3.2",
-    "electron": "^12.0.9",
+    "electron": "^13.6.6",
     "electron-builder": "^22.8.1",
     "electron-reload": "1.5.0",
     "jasmine-core": "~3.6.0",
