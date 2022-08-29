@@ -76,7 +76,7 @@
     "base64-arraybuffer": "^0.2.0",
     "electron-context-menu": "^3.1.0",
     "ip-cidr": "^2.0.6",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "ngx-infinite-scroll": "^8.0.1",
     "pako": "^1.0.10",
     "pixelmatch": "^5.1.0",
