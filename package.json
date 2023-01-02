@@ -27,7 +27,7 @@
     "test": "ng test"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^0.1102.13",
+    "@angular-devkit/build-angular": "^15.0.4",
     "@angular-extensions/lint-rules": "^1.1.1",
     "@angular/cli": "12.0.0",
     "@angular/common": "12.0.0",
